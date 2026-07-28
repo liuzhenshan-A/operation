@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>续签情况 - 运营工作台</title>
+  <link rel="stylesheet" href="css/common.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    .kpi-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .kpi-card .kpi-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin: 8px 0;
+    }
+    .kpi-card .kpi-label {
+      font-size: 13px;
+      color: #666;
+    }
+    .kpi-card .kpi-change {
+      font-size: 12px;
+      color: #52c41a;
+    }
+    .kpi-card .kpi-change.negative {
+      color: #f5222d;
+    }
+    .chart-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .chart-card .chart-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chart-container {
+      width: 100%;
+      height: 300px;
+    }
+    .grid-4 {
+      margin-bottom: 20px;
+    }
+    .status-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-tag.success {
+      background: #f6ffed;
+      color: #52c41a;
+      border: 1px solid #b7eb8f;
+    }
+    .status-tag.warning {
+      background: #fffbe6;
+      color: #faad14;
+      border: 1px solid #ffe58f;
+    }
+    .status-tag.danger {
+      background: #fff2f0;
+      color: #f5222d;
+      border: 1px solid #ffccc7;
+    }
+    .change-positive {
+      color: #52c41a;
+    }
+    .change-negative {
+      color: #f5222d;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">🔄</div>
+        <h1>运营工作台</h1>
+      </div>
+      <nav id="sidebar-menu"></nav>
+    </aside>
+    <div class="main-content">
+      <div class="page-header">
+        <h2 id="page-title">续签情况</h2>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-title">查询条件</div>
+          <form class="search-form">
+            <div class="form-item">
+              <label>截止年月</label>
+              <input type="month" id="endDate" value="">
+              <span class="help-icon" data-title="选择数据统计截止月份，默认为当前月份">?</span>
+            </div>
+            <div class="form-item">
+              <label>保险类别</label>
+              <select id="insuranceType">
+                <option value="">全部</option>
+                <option value="employer">雇主</option>
+                <option value="supplement">补充</option>
+              </select>
+              <span class="help-icon" data-title="按保险类别筛选续签数据">?</span>
+            </div>
+            <div class="form-item">
+              <label>所属客服</label>
+              <input type="text" id="customerService" placeholder="请输入所属客服">
+              <span class="help-icon" data-title="按所属客服筛选续签数据">?</span>
+            </div>
+            <button type="button" class="search-btn" onclick="search()">查询</button>
+            <button type="button" class="search-btn" style="background:#d9d9d9" onclick="resetForm()">重置</button>
+          </form>
+        </div>
+
+        <div class="grid-4" style="gap:16px">
+          <div class="kpi-card">
+            <div class="kpi-label">
+              当前应收保费
+              <span class="help-icon" data-title="应续保费 = 查询截止年月到期团单的实际收入保费">?</span>
+            </div>
+            <div class="kpi-value">¥1,850.6万</div>
+            <div class="kpi-change">+1.2% 同比</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">
+              当前实收保费
+              <span class="help-icon" data-title="实收保费 = 查询截止年月实际已收到的续期保费">?</span>
+            </div>
+            <div class="kpi-value">¥1,621.8万</div>
+            <div class="kpi-change">+1.5% 同比</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">
+              续签率
+              <span class="help-icon" data-title="实收保费 / 应收保费 × 100%">?</span>
+            </div>
+            <div class="kpi-value">87.6%</div>
+            <div class="kpi-change">+1.5% 同比</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">
+              未续签金额
+              <span class="help-icon" data-title="应收保费 - 实收保费，即尚未收到的保费">?</span>
+            </div>
+            <div class="kpi-value">¥228.8万</div>
+            <div class="kpi-change negative">+2.3% 同比</div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">
+            <span id="chartTitle"></span>12月续签保费对比（当前应收保费 vs 实收保费）</span>
+            <span class="help-icon" data-title="根据查询截止月份，展示近12个月份的应收保费和实收保费对比">?</span>
+          </div>
+          <div class="chart-container" id="renewalChart"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span class="icon-cell">
+              <span class="mini-icon"></span>
+              续签明细
+            </span>
+            <span class="help-icon" data-title="根据查询截止年月，往前推12个月（不含查询当月）的续签明细数据">?</span>
+            <button type="button" class="search-btn" style="margin-left:auto;font-size:12px;padding:6px 16px" onclick="viewDetail()">查看明细</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>月份</th>
+                  <th>应收保费(万)</th>
+                  <th>实收保费(万)</th>
+                  <th>差额(万)</th>
+                  <th>续签率</th>
+                  <th>同比增长</th>
+                  <th>续签状态</th>
+                </tr>
+              </thead>
+              <tbody id="renewalTableBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var today = new Date();
+      var year = today.getFullYear();
+      var month = String(today.getMonth() + 1).padStart(2, '0');
+      document.getElementById('endDate').value = year + '-' + month;
+      initChart();
+      renderTable();
+    });
+
+    function search() {
+      var endDate = document.getElementById('endDate').value;
+      var insuranceType = document.getElementById('insuranceType').value;
+      var customerService = document.getElementById('customerService').value;
+      console.log('查询条件:', { endDate, insuranceType, customerService });
+      if (chartInstance) {
+        chartInstance.dispose();
+        chartInstance = null;
+      }
+      initChart();
+      renderTable();
+    }
+
+    function viewDetail() {
+      window.location.href = 'renewal-detail.html';
+    }
+
+    function resetForm() {
+      var today = new Date();
+      var year = today.getFullYear();
+      var month = String(today.getMonth() + 1).padStart(2, '0');
+      document.getElementById('endDate').value = year + '-' + month;
+      document.getElementById('insuranceType').value = '';
+      document.getElementById('customerService').value = '';
+      if (chartInstance) {
+        chartInstance.dispose();
+        chartInstance = null;
+      }
+      initChart();
+      renderTable();
+    }
+
+    function getMonthsBefore(endDate, count) {
+      var parts = endDate.split('-');
+      var year = parseInt(parts[0]);
+      var month = parseInt(parts[1]);
+      var months = [];
+      for (var i = 0; i < count; i++) {
+        var m = month - i;
+        var y = year;
+        while (m <= 0) {
+          m += 12;
+          y--;
+        }
+        months.unshift(y + '-' + String(m).padStart(2, '0'));
+      }
+      return months;
+    }
+
+    function getStatusInfo(renewalRate) {
+      if (renewalRate >= 85) {
+        return { text: '正常', class: 'success' };
+      } else if (renewalRate >= 75) {
+        return { text: '预警', class: 'warning' };
+      } else {
+        return { text: '异常', class: 'danger' };
+      }
+    }
+
+    function renderTable() {
+      var endDate = document.getElementById('endDate').value;
+      if (!endDate) return;
+
+      var months = getMonthsBefore(endDate, 12);
+      var tbody = document.getElementById('renewalTableBody');
+      var html = '';
+
+      months.forEach(function(monthStr, index) {
+        var receivable = (1800 - index * 5 + Math.random() * 100).toFixed(1);
+        var actual = (receivable * (0.82 + Math.random() * 0.08)).toFixed(1);
+        var diff = (receivable - actual).toFixed(1);
+        var rate = ((actual / receivable) * 100).toFixed(1);
+        var growth = ((Math.random() - 0.5) * 4).toFixed(1);
+        var status = getStatusInfo(parseFloat(rate));
+        var growthClass = growth >= 0 ? 'change-positive' : 'change-negative';
+        var growthText = growth >= 0 ? '+' + growth + '%' : growth + '%';
+
+        html += '<tr>';
+        html += '<td>' + monthStr + '</td>';
+        html += '<td>' + parseFloat(receivable).toLocaleString() + '</td>';
+        html += '<td>' + parseFloat(actual).toLocaleString() + '</td>';
+        html += '<td>' + parseFloat(diff).toLocaleString() + '</td>';
+        html += '<td>' + rate + '%</td>';
+        html += '<td class="' + growthClass + '">' + growthText + '</td>';
+        html += '<td><span class="status-tag ' + status.class + '">' + status.text + '</span></td>';
+        html += '</tr>';
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    var chartInstance = null;
+
+    function initChart() {
+      var endDate = document.getElementById('endDate').value;
+      if (!endDate) return;
+      var months = getMonthsBefore(endDate, 12);
+      document.getElementById('chartTitle').textContent = months[0] + '至' + months[months.length - 1] 
+      var chart = echarts.init(document.getElementById('renewalChart'));
+      chart.setOption({
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          },
+          formatter: function(params) {
+            var result = params[0].axisValueLabel + '<br/>';
+            params.forEach(function(item) {
+              result += item.marker + item.seriesName + ': ' + item.value + '万<br/>';
+            });
+            return result;
+          }
+        },
+        legend: {
+          data: ['当前应收保费', '实收保费'],
+          bottom: 0
+        },
+        grid: {
+          top: 40,
+          right: 20,
+          bottom: 50,
+          left: 60
+        },
+        xAxis: {
+          type: 'category',
+          data: months,
+          axisLine: {
+            lineStyle: { color: '#e8e8e8' }
+          },
+          axisLabel: {
+            color: '#999',
+            fontSize: 12
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: '万元',
+          nameTextStyle: {
+            color: '#999',
+            fontSize: 12,
+            padding: [0, 30, 0, 0]
+          },
+          axisLine: {
+            show: false
+          },
+          axisLabel: {
+            color: '#999',
+            fontSize: 12
+          },
+          splitLine: {
+            lineStyle: {
+              color: '#f0f0f0'
+            }
+          }
+        },
+        series: [
+          {
+            name: '当前应收保费',
+            type: 'bar',
+            data: months.map(function(m, i) { return (1200 + i * 50 + Math.random() * 100).toFixed(0); }),
+            itemStyle: {
+              color: '#1890ff'
+            },
+            barWidth: '35%'
+          },
+          {
+            name: '实收保费',
+            type: 'bar',
+            data: months.map(function(m, i) { return (1050 + i * 50 + Math.random() * 80).toFixed(0); }),
+            itemStyle: {
+              color: '#faad14'
+            },
+            barWidth: '35%'
+          }
+        ]
+      });
+      chartInstance = chart;
+
+      window.addEventListener('resize', function() {
+        chart.resize();
+      });
+    }
+  </script>
+</body>
+</html>

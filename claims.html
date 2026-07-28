@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>理赔数据 - 运营工作台</title>
+<link rel="stylesheet" href="css/common.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+  --c-bg:#f5f6fa;--c-surface:#fff;--c-text:#1a1d2e;--c-text2:#595f72;--c-text3:#949aad;
+  --c-border:#e8ebf3;--c-border-light:#f2f4f9;--c-row-hover:#f8f9fd;
+  --blue:#4f6ef7;--blue-bg:#eef1fe;--blue-dark:#3b54d4;
+  --red:#f25656;--red-bg:#fef1f1;--green:#2ec4a7;--green-bg:#edfaf7;
+  --orange:#f5a854;--orange-bg:#fef7ee;--purple:#7c5cfc;--purple-bg:#f2effe;
+  --radius:14px;--radius-sm:10px;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02);
+  --shadow-hover:0 4px 16px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.03);
+  --transition:0.22s cubic-bezier(.4,0,.2,1);
+}
+.page-body{padding:22px 28px;display:flex;flex-direction:column;gap:18px}
+.kpi-section{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi-card{background:#fff;border-radius:var(--radius);padding:20px 18px 16px;box-shadow:var(--shadow);transition:var(--transition);position:relative;overflow:hidden;border:1px solid transparent;animation:fadeUp .45s ease both}
+.kpi-card:nth-child(1){animation-delay:0s}.kpi-card:nth-child(2){animation-delay:.05s}.kpi-card:nth-child(3){animation-delay:.10s}.kpi-card:nth-child(4){animation-delay:.15s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:var(--c-border)}
+.kpi-card .kpi-icon-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.kpi-card .kpi-icon-dot{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.kpi-icon-dot.c1{background:#eef1fe;color:var(--blue)}.kpi-icon-dot.c2{background:#edfaf7;color:var(--green)}.kpi-icon-dot.c3{background:#fef7ee;color:var(--orange)}.kpi-icon-dot.c4{background:#f2effe;color:var(--purple)}.kpi-icon-dot.c5{background:#fef1f1;color:var(--red)}
+.kpi-card .kpi-title{font-size:12px;color:var(--c-text3);font-weight:550;letter-spacing:.1px}
+.kpi-card .kpi-value-row{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.kpi-card .kpi-current{font-size:30px;font-weight:750;color:var(--c-text);letter-spacing:-.8px;line-height:1}
+.kpi-card .kpi-unit{font-size:13px;color:var(--c-text3);font-weight:500}
+.kpi-card .kpi-meta{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid var(--c-border-light)}
+.kpi-card .kpi-sync-label{font-size:11px;color:var(--c-text3)}
+.kpi-card .kpi-sync-value{font-size:13px;color:var(--c-text2);font-weight:600}
+.kpi-card .kpi-delta{font-weight:650;padding:3px 10px;border-radius:20px;font-size:12px;margin-left:auto}
+.kpi-delta.up{background:var(--red-bg);color:var(--red)}.kpi-delta.down{background:var(--green-bg);color:var(--green)}.kpi-delta.warn{background:var(--orange-bg);color:var(--orange)}
+.alert-banner{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.alert-item{padding:14px 16px;border-radius:var(--radius-sm);display:flex;align-items:flex-start;gap:10px;font-size:12px;background:#fff;box-shadow:var(--shadow);transition:var(--transition);border:1px solid transparent;position:relative;overflow:hidden}
+.alert-item::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0}
+.alert-item.critical::before{background:var(--red)}.alert-item.warning::before{background:var(--orange)}.alert-item.info::before{background:var(--blue)}
+.alert-item:hover{box-shadow:var(--shadow-hover);border-color:var(--c-border)}
+.alert-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.alert-item.critical .alert-icon{background:var(--red-bg)}.alert-item.warning .alert-icon{background:var(--orange-bg)}.alert-item.info .alert-icon{background:var(--blue-bg)}
+.alert-content{flex:1;min-width:0}
+.alert-content .alert-title{font-weight:650;margin-bottom:2px;color:var(--c-text);font-size:12px}
+.alert-content .alert-desc{color:var(--c-text3);font-size:11px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart-card{background:#fff;border-radius:var(--radius);padding:20px 22px 14px;box-shadow:var(--shadow);transition:var(--transition);border:1px solid transparent}
+.chart-card:hover{border-color:var(--c-border);box-shadow:var(--shadow-hover)}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:14px;font-weight:650;margin-bottom:4px;color:var(--c-text);display:flex;align-items:center;justify-content:space-between;letter-spacing:-.2px}
+.chart-subtitle{font-size:11px;color:var(--c-text3);font-weight:450;display:flex;align-items:center;gap:10px}
+.chart-container{width:100%;height:340px}
+.chart-container.tall{height:400px}
+.legend-dot{width:8px;height:8px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:middle}
+.ai-card{position:relative;overflow:hidden}
+.ai-card::after{content:'';position:absolute;top:-60px;right:-60px;width:140px;height:140px;background:linear-gradient(135deg,rgba(79,110,247,.04),rgba(124,92,252,.06));border-radius:50%;pointer-events:none}
+.ai-content{padding:6px 2px 12px;font-size:13px;line-height:1.8;color:var(--c-text2)}
+.ai-section{margin-bottom:14px}
+.ai-section-title{font-size:13px;font-weight:650;color:var(--c-text);margin-bottom:4px}
+.ai-section-title::before{content:'■ ';color:var(--blue);font-size:10px}
+.ai-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:0 3px}
+.ai-tag.red{background:#fef1f1;color:#f25656}.ai-tag.green{background:#edfaf7;color:#2ec4a7}.ai-tag.blue{background:#eef1fe;color:#4f6ef7}
+.ai-bullet{padding-left:12px;position:relative}
+.ai-bullet::before{content:'•';position:absolute;left:0;color:var(--c-text3)}
+.ai-divider{border:none;border-top:1px dashed var(--c-border);margin:10px 0}
+.ai-placeholder{text-align:center;padding:40px 20px;color:var(--c-text3)}
+.ai-placeholder-icon{font-size:42px;margin-bottom:12px;opacity:.6}
+.ai-placeholder-text{font-size:13px;line-height:1.8;max-width:480px;margin:0 auto}
+.ai-btn{display:inline-flex;align-items:center;gap:4px;padding:8px 18px;border:none;border-radius:8px;background:linear-gradient(135deg,#4f6ef7,#7c5cfc);color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap;box-shadow:0 2px 8px rgba(79,110,247,.3)}
+.ai-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(79,110,247,.4)}
+.ai-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.ai-btn .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:ai-spin .6s linear infinite;margin-right:2px}
+@keyframes ai-spin{to{transform:rotate(360deg)}}
+.table-section{margin-top:0}
+.table-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid transparent;transition:var(--transition)}
+.table-card:hover{border-color:var(--c-border)}
+.table-header-bar{padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--c-border-light)}
+.table-title{font-size:14px;font-weight:650;letter-spacing:-.2px}
+.table-tabs{display:flex;gap:3px;background:var(--c-bg);padding:3px;border-radius:9px}
+.table-tab{padding:6px 15px;border-radius:7px;font-size:12px;cursor:pointer;border:none;background:transparent;color:var(--c-text3);transition:var(--transition);font-weight:500}
+.table-tab.active{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.05);font-weight:600}
+.table-tab:hover:not(.active){color:var(--c-text2)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#f9fafc;padding:11px 14px;text-align:right;font-weight:600;color:var(--c-text2);border-bottom:2px solid var(--c-border);white-space:nowrap;position:sticky;top:0;font-size:12px;letter-spacing:.1px}
+thead th:first-child{text-align:left;min-width:155px}
+tbody td{padding:10px 14px;text-align:right;border-bottom:1px solid var(--c-border-light);white-space:nowrap;font-variant-numeric:tabular-nums}
+tbody td:first-child{text-align:left;font-weight:550}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--c-row-hover)}
+tbody tr.group-row td{font-weight:650;color:var(--c-text);border-bottom:1px solid var(--c-border);background:#fafbfd;font-size:13px}
+.delta-positive{color:var(--red);font-weight:650}.delta-negative{color:var(--green);font-weight:650}
+.rate-cell{font-weight:650}.rate-high{color:var(--red)}.rate-warn{color:var(--orange)}.rate-ok{color:var(--green)}
+.info-tip{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#e8ebf3;color:#949aad;font-size:10px;font-weight:700;cursor:help;flex-shrink:0;transition:all .15s;line-height:1;vertical-align:middle;margin-left:5px}
+.info-tip:hover{background:var(--blue);color:#fff}
+.tooltip-popup{position:fixed;z-index:9999;pointer-events:none;background:#2a2f45;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;line-height:1.75;max-width:380px;min-width:220px;white-space:normal;word-wrap:break-word;box-shadow:0 10px 32px rgba(0,0,0,.22);opacity:0;transform:translate(-50%,-100%) translateY(6px);transition:opacity .18s,transform .18s}
+.tooltip-popup.show{opacity:1;transform:translate(-50%,-100%) translateY(0)}
+.tooltip-popup .tip-rules{color:#b9bfd4;font-size:12px;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.12)}
+@media(max-width:1400px){.kpi-section{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr}.alert-banner{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.kpi-section{grid-template-columns:1fr}.alert-banner{grid-template-columns:1fr}.search-form{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon">📋</div>
+      <h1>运营工作台</h1>
+    </div>
+    <nav id="sidebar-menu"></nav>
+  </aside>
+  <div class="main-content">
+    <div class="page-header">
+      <h2 id="page-title">理赔数据</h2>
+    </div>
+    <div class="page-body">
+      <div class="card">
+        <div class="card-title">查询条件</div>
+        <form class="search-form">
+          <div class="form-item">
+            <label>所属客服</label>
+            <select id="filterService">
+              <option value="" selected>全部客服</option>
+              <option value="客服A组">韩笑</option>
+              <option value="客服B组">金含</option>
+              <option value="客服C组">刘朏朏</option>
+            </select>
+            <span class="help-icon" data-title="按所属客服筛选理赔数据">?</span>
+          </div>
+          <div class="form-item">
+            <label>所属保司</label>
+            <select id="filterCompany">
+              <option value="" selected>全部保司</option>
+              <option value="中国人寿">中国人寿</option>
+              <option value="平安保险">平安保险</option>
+              <option value="太平洋保险">太平洋保险</option>
+            </select>
+            <span class="help-icon" data-title="按保险公司筛选理赔数据">?</span>
+          </div>
+          <div class="form-item">
+            <label>理赔组长</label>
+            <select id="filterLeader">
+              <option value="" selected>全部组长</option>
+              <option value="张组长">李雪</option>
+              <option value="李组长">李旭</option>
+              <option value="王组长">慢羊羊</option>
+            </select>
+            <span class="help-icon" data-title="按理赔组长筛选数据">?</span>
+          </div>
+          <div class="form-item">
+            <label>大帽子</label>
+            <input type="text" id="filterBigHat" placeholder="请输入大帽子">
+            <span class="help-icon" data-title="输入大帽子进行模糊查询">?</span>
+          </div>
+          <div class="form-item">
+            <label>合同方</label>
+            <input type="text" id="filterContractParty" placeholder="请输入合同方">
+            <span class="help-icon" data-title="输入合同方进行模糊查询">?</span>
+          </div>
+          <div class="form-item">
+            <label>付款方</label>
+            <input type="text" id="filterPayer" placeholder="请输入付款方">
+            <span class="help-icon" data-title="输入付款方进行模糊查询">?</span>
+          </div>
+          <div class="form-item">
+            <label>当前年度</label>
+            <select id="filterYear">
+              <option value="2024" selected>2025年</option>
+              <option value="2025">2026年</option>
+            </select>
+            <span class="help-icon" data-title="选择当前统计年度">?</span>
+          </div>
+          <div class="form-item">
+            <label>截止月份</label>
+            <select id="filterMonth">
+              <option value="">全年</option>
+              <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+              <option value="4">4月</option><option value="5">5月</option><option value="6" selected>6月</option>
+              <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+              <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+            </select>
+            <span class="help-icon" data-title="选择数据统计截止月份">?</span>
+          </div>
+          <div class="form-item">
+            <label>同期对比</label>
+            <select id="filterCompareYear">
+              <option value="2023" selected>2025年</option>
+              <option value="2024">2024年</option>
+            </select>
+            <span class="help-icon" data-title="选择同期对比年度">?</span>
+          </div>
+          <button type="button" class="search-btn" onclick="refreshData()">查询</button>
+          <button type="button" class="search-btn" style="background:#d9d9d9" onclick="resetFilters()">重置</button>
+        </form>
+      </div>
+      <div class="alert-banner" id="alertBanner"></div>
+      <div class="kpi-section" id="kpiCards"></div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">理赔率月度趋势
+            <span class="chart-subtitle">
+              <span class="legend-dot" style="background:var(--blue)"></span>当前
+              <span class="legend-dot" style="background:#c0c7d6"></span>同期
+              <span class="legend-dot" style="background:var(--red)"></span>预警线 85%
+            </span>
+            <span class="info-tip" data-tip="展示当月及过去12个月理赔率走势。" data-rules="逐月理赔率 = 当月已用赔款  当月可用赔款 × 100%。红线为 85% 固定预警线。">?</span>
+          </div>
+          <div class="chart-container" id="chartTrend"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">理赔率变化 · 归因分析（同期→当前）<span class="info-tip" data-tip="将理赔率同比变化拆解到各明细维度。" data-rules="贡献度 = 该项同期→当期变化额 ÷ 总变化额 × 100%。展示对变化贡献最大的前 8 项。">?</span></div>
+          <div class="chart-container" id="chartAttribution"></div>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">费用类型赔款对比（同期 vs 当前）<span class="info-tip" data-tip="按费用类别展示同期与当期赔款金额对比。" data-rules="蓝色柱 = 当期赔款，灰色柱 = 同期赔款。按同期金额升序排列。">?</span></div>
+          <div class="chart-container tall" id="chartFeeType"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">医院维度分布（当前）<span class="info-tip" data-tip="按医院性质和等级展示当期赔款分布。" data-rules="左侧饼图 = 医院性质（公立/私立），右侧饼图 = 医院等级（未定级/一级/二级/三级）。">?</span></div>
+          <div class="chart-container tall" id="chartHospital"></div>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card full">
+          <div class="chart-title">同期案件汇总
+            <span class="chart-subtitle">含案件数量、赔付金额及平均赔付单价</span>
+            <span class="info-tip" data-tip="按案件状态统计各阶段案件数量、赔付金额及平均单价。" data-rules="平均赔付单价 = 赔付金额  案件数（万元/件）。合计行统计所有状态汇总。">?</span>
+          </div>
+          <div class="table-wrap" id="caseFlowTable" style="max-height:340px;overflow-y:auto;"></div>
+        </div>
+      </div>
+      <div class="table-section">
+        <div class="table-card">
+          <div class="table-header-bar">
+            <div class="table-title">赔款明细分析<span class="info-tip" data-tip="多维度赔款明细，含同期/当期金额、占比、差额及变化率。" data-rules="差额 = 当期 − 同期。变化率 = 差额 ÷ 同期 × 100%。红色 = 增长，绿色 = 下降。可分维度切换查看。">?</span></div>
+            <div class="table-tabs">
+              <div class="table-tab active" onclick="switchTableTab('all',this)">全部</div>
+              <div class="table-tab" onclick="switchTableTab('visit',this)">就诊类型</div>
+              <div class="table-tab" onclick="switchTableTab('hospital',this)">医院维度</div>
+              <div class="table-tab" onclick="switchTableTab('drug',this)">药品类型</div>
+              <div class="table-tab" onclick="switchTableTab('fee',this)">费用明细</div>
+              <div class="table-tab" onclick="switchTableTab('deduct',this)">扣除项</div>
+            </div>
+          </div>
+          <div class="table-wrap" id="detailTable"></div>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card ai-card full">
+          <div class="chart-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <span>🤖 AI 智能分析<span class="chart-subtitle" style="margin-left:8px;">基于当前数据的理赔率变动归因</span><span class="info-tip" data-tip="AI 基于当前赔付数据自动生成理赔率变动归因分析。" data-rules="分析维度：KPI关键指标 → 各维度归因 → 风险识别 → 管理建议。点击「调用AI分析」重新生成。">?</span></span>
+            <button class="ai-btn" id="aiAnalyzeBtn" onclick="runAIAnalysis()"><span class="ai-btn-icon">⚡</span> 调用AI分析</button>
+          </div>
+          <div class="ai-content" id="aiAnalysis">
+            <div class="ai-placeholder">
+              <div class="ai-placeholder-icon">🤖</div>
+              <div class="ai-placeholder-text">当前数据已就绪，点击右上角<b>「⚡ 调用AI分析」</b>按钮，AI 大模型将根据当前页面所有数据自动生成理赔归因分析报告。</div>
+            </div>
+          </div>
+          <div class="ai-prompt-detail" id="aiPromptDetail" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const AI_CONFIG={url:'https://api.openai.com/v1/chat/completions',model:'gpt-4o',apiKey:'',maxTokens:2000,temperature:0.3};
+function generateMonthlyTrend(){const M=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];const syncBase=[78,79,80,81,82,83,84,83,82,81,80,79];const curBase=[82,83,84,85,86,87,86,85,84,83,82,81];const sync=M.map((m,i)=>({month:m,rate:+(syncBase[i]+(Math.random()-.5)*2).toFixed(2)}));const cur=M.map((m,i)=>({month:m,rate:+(curBase[i]+(Math.random()-.5)*2).toFixed(2)}));return{sync,cur}}
+function generateKPI(){return{premium:{name:'应支保费（含税）',tip:'保单年度内应收保费总额（含税点），反映业务规模。',rules:'同期口径：对应历史保单年度同期保费。',unit:'万元',icon:'💰',cls:'c1',cur:5520,sync:5000,delta:520,pct:10.40},available:{name:'可用赔款',tip:'可用于理赔支出的总预算额度。',rules:'可用赔款 = 应支保费（不含税）。',unit:'万元',icon:'📋',cls:'c2',cur:552,sync:500,delta:52,pct:10.40},used:{name:'已用赔款',tip:'已实际支出的理赔金额（含主险）。',rules:'口径：以初审通过的为计算依据。',unit:'万元',icon:'',cls:'c3',cur:482,sync:420,delta:62,pct:14.76},claimRate:{name:'理赔率',tip:'已用赔款  可用赔款 × 100%。',rules:'预警规则：>85% 触发高危，>75% 关注。',unit:'%',icon:'📈',cls:'c5',cur:87.32,sync:84.00,delta:3.32,pct:3.95}}}
+function generateDetails(){return{visit:[{cat:'就诊类型',name:'门诊赔款',sync:220.0,cur:200.0,sr:52.38,cr:41.49},{cat:'就诊类型',name:'住院赔款',sync:200.0,cur:282.0,sr:47.62,cr:58.51}],hospNature:[{cat:'医院性质',name:'私立医院赔款',sync:108.6,cur:136.2,sr:25.86,cr:28.26},{cat:'医院性质',name:'公立医院赔款',sync:311.4,cur:345.8,sr:74.14,cr:71.74}],hospLevel:[{cat:'医院等级',name:'未定级医院赔款',sync:41.2,cur:46.8,sr:9.81,cr:9.71},{cat:'医院等级',name:'一级医院赔款',sync:58.4,cur:62.1,sr:13.90,cr:12.88},{cat:'医院等级',name:'二级医院赔款',sync:138.6,cur:158.3,sr:33.00,cr:32.84},{cat:'医院等级',name:'三级医院赔款',sync:181.8,cur:214.8,sr:43.29,cr:44.56}],drug:[{cat:'药品类型',name:'中草药',sync:32.0,cur:22.0,sr:7.62,cr:4.56},{cat:'药品类型',name:'中成药',sync:42.8,cur:48.5,sr:10.19,cr:10.06},{cat:'药品类型',name:'西药',sync:156.8,cur:186.2,sr:37.33,cr:38.63}],fee:[{cat:'费用类型',name:'检查费',sync:68.4,cur:79.8,sr:16.29,cr:16.56},{cat:'费用类型',name:'化验费',sync:42.6,cur:49.2,sr:10.14,cr:10.21},{cat:'费用类型',name:'护理费',sync:24.8,cur:27.1,sr:5.90,cr:5.62},{cat:'费用类型',name:'床位费',sync:31.2,cur:35.4,sr:7.43,cr:7.34},{cat:'费用类型',name:'手术费',sync:52.8,cur:58.6,sr:12.57,cr:12.16},{cat:'费用类型',name:'中医治疗',sync:18.6,cur:19.8,sr:4.43,cr:4.11},{cat:'费用类型',name:'西医治疗',sync:88.4,cur:102.6,sr:21.05,cr:21.29},{cat:'费用类型',name:'物理治疗',sync:15.2,cur:16.4,sr:3.62,cr:3.40},{cat:'费用类型',name:'材料费',sync:38.6,cur:44.2,sr:9.19,cr:9.17},{cat:'费用类型',name:'挂号费',sync:8.6,cur:9.1,sr:2.05,cr:1.89},{cat:'费用类型',name:'其他费用赔款',sync:30.8,cur:39.8,sr:7.33,cr:8.26}],deduct:[{cat:'扣除项',name:'免赔扣除',sync:38.6,cur:45.2,sr:9.19,cr:9.38},{cat:'扣除项',name:'其他扣除金额',sync:18.2,cur:21.5,sr:4.33,cr:4.46},{cat:'扣除项',name:'超限额扣除',sync:12.8,cur:15.3,sr:3.05,cr:3.17},{cat:'扣除项',name:'特殊比例扣除',sync:8.4,cur:9.8,sr:2.00,cr:2.03}]}}
+function generateAlerts(kpi,details){const a=[];const all=[...details.visit,...details.hospNature,...details.hospLevel,...details.drug,...details.fee,...details.deduct];const consumeRate=kpi.used.cur/kpi.available.cur*100;if(kpi.claimRate.cur>85){a.push({lvl:'critical',icon:'●',title:'理赔率超阈值',tip:'监控理赔率是否超出安全线。',rules:'当前理赔率 > 85% 预警线时触发。',desc:`当前理赔率 ${kpi.claimRate.cur.toFixed(2)}%，超过85%预警线，同比上升 ${kpi.claimRate.delta.toFixed(2)}pp，需重点关注。`})}else if(kpi.claimRate.delta>3){a.push({lvl:'warning',icon:'●',title:'理赔率快速上升',tip:'监控理赔率的同比上升速度。',rules:'同比上升幅度 > 3pp 时触发。',desc:`当前理赔率 ${kpi.claimRate.cur.toFixed(2)}%，同比上升 ${kpi.claimRate.delta.toFixed(2)}pp，虽未超预警线但增速较快。`})}else if(kpi.claimRate.delta<-2){a.push({lvl:'info',icon:'●',title:'理赔率同比下降',tip:'监控理赔率的同比改善趋势。',rules:'同比下降幅度 > 2pp 时触发。',desc:`当前理赔率 ${kpi.claimRate.cur.toFixed(2)}%，同比下降 ${Math.abs(kpi.claimRate.delta).toFixed(2)}pp，风险有所释放。`})}else{a.push({lvl:'info',icon:'●',title:'理赔率运行平稳',tip:'理赔率无显著异常时的默认状态。',rules:'理赔率 ≤ 85% 且同比变化在 ±3pp 内。',desc:`当前理赔率 ${kpi.claimRate.cur.toFixed(2)}%，同比变化 ${kpi.claimRate.delta.toFixed(2)}pp，处于正常波动区间。`})}if(consumeRate>90){a.push({lvl:'critical',icon:'●',title:'可用赔款消耗过快',tip:'监控可用赔款预算消耗进度。',rules:'消耗率 > 90% 时触发高危。消耗率 = 已用赔款  可用赔款 × 100%。',desc:`已消耗 ${consumeRate.toFixed(1)}% 可用赔款，建议立即收紧高风险案件审批。`})}else if(consumeRate>75){a.push({lvl:'warning',icon:'●',title:'可用赔款消耗偏快',tip:'监控可用赔款预算消耗进度。',rules:'消耗率 > 75% 时触发预警。消耗率 = 已用赔款 ÷ 可用赔款 × 100%。',desc:`已消耗 ${consumeRate.toFixed(1)}% 可用赔款，建议加强预算管控。`})}else{a.push({lvl:'info',icon:'●',title:'预算消耗健康',tip:'预算消耗处于健康水平的默认状态。',rules:'消耗率 ≤ 75%，预算执行进度正常。',desc:`已消耗 ${consumeRate.toFixed(1)}% 可用赔款，预算执行进度处于健康水平。`})}const topRise=all.map(d=>({name:d.name,delta:d.cur-d.sync,rate:d.sync>0?(d.cur-d.sync)/d.sync*100:0,cur:d.cur,sync:d.sync})).sort((a,b)=>b.delta-a.delta)[0];if(topRise&&topRise.delta>0){a.push({lvl:'warning',icon:'●',title:`${topRise.name}增长显著`,tip:'自动识别所有明细维度中增长最快的项目。',rules:'扫描所有明细维度（就诊/医院/药品/费用/扣除项），按同比变化额降序取第一项。',desc:`${topRise.name}同比增加 ${topRise.delta.toFixed(1)}万元（+${topRise.rate.toFixed(1)}%），是赔款增长的主要贡献项。`})}else{a.push({lvl:'info',icon:'●',title:'各维度增长均衡',tip:'无异常增长项时的默认状态。',rules:'所有明细维度变化额均 ≤ 0 时触发。',desc:`未识别到异常高增长维度，各明细项同比变化均在合理范围内。`})}const topDrop=all.map(d=>({name:d.name,delta:d.cur-d.sync,rate:d.sync>0?(d.cur-d.sync)/d.sync*100:0,cur:d.cur,sync:d.sync})).sort((a,b)=>a.delta-b.delta)[0];if(topDrop&&topDrop.delta<0){a.push({lvl:'info',icon:'●',title:`${topDrop.name}同比下降`,tip:'自动识别所有明细维度中下降最多的项目。',rules:'扫描所有明细维度，按同比变化额升序取第一项（下降最大）。',desc:`${topDrop.name}同比减少 ${Math.abs(topDrop.delta).toFixed(1)}万元（${topDrop.rate.toFixed(1)}%），对理赔率上升起到抑制作用。`})}else{a.push({lvl:'info',icon:'●',title:'各维度同比均增长',tip:'无下降项时的默认状态。',rules:'所有明细维度变化额均 ≥ 0 时触发。',desc:`所有明细维度当期赔款均不低于同期，整体呈增长态势，需关注增长来源。`})}return a}
+function generateAttribution(details){const all=[...details.visit,...details.hospNature,...details.hospLevel,...details.drug,...details.fee,...details.deduct];const T=62;const items=all.map(d=>{const delta=d.cur-d.sync;return{name:d.name,sync:d.sync,cur:d.cur,delta,contrib:+(delta/T*100).toFixed(1),abs:Math.abs(delta/T*100)}});items.sort((a,b)=>b.abs-a.abs);return items.slice(0,8)}
+const chartInstances={};
+function getChart(id){if(chartInstances[id])chartInstances[id].dispose();const dom=document.getElementById(id);if(!dom)return null;chartInstances[id]=echarts.init(dom);return chartInstances[id]}
+let currentTab='all';
+function renderKPIs(kpi){const keys=['premium','available','used','claimRate'];document.getElementById('kpiCards').innerHTML=keys.map(k=>{const d=kpi[k],isRate=k==='claimRate';const cls=d.delta>0?'up':(d.delta<0?'down':'warn');const sym=d.delta>0?'↑':(d.delta<0?'↓':'→');const deltaStr=isRate?`${sym} ${d.delta.toFixed(2)}pp`:`${sym} ${Math.abs(d.delta)}${d.unit}`;return`<div class="kpi-card"><div class="kpi-icon-row"><div class="kpi-icon-dot ${d.cls}">${d.icon}</div><div class="kpi-title">${d.name}<span class="info-tip" data-tip="${d.tip}" data-rules="${d.rules}">?</span></div></div><div class="kpi-value-row"><span class="kpi-current">${isRate?d.cur.toFixed(2)+'%':d.cur}</span><span class="kpi-unit">${d.unit}</span></div><div class="kpi-meta"><span class="kpi-sync-label">同期</span><span class="kpi-sync-value">${isRate?d.sync.toFixed(2)+'%':d.sync+d.unit}</span><span class="kpi-delta ${cls}">${deltaStr}</span></div></div>`}).join('')}
+function renderAlertsSection(kpi,details){const alerts=generateAlerts(kpi,details);document.getElementById('alertBanner').innerHTML=alerts.map(a=>`<div class="alert-item ${a.lvl}"><div class="alert-icon">${a.icon}</div><div class="alert-content"><div class="alert-title">${a.title}<span class="info-tip" data-tip="${a.tip}" data-rules="${a.rules}">?</span></div><div class="alert-desc">${a.desc}</div></div></div>`).join('')}
+function renderTrend(){const{sync,cur}=generateMonthlyTrend();const chart=getChart('chartTrend');if(!chart)return;chart.setOption({tooltip:{trigger:'axis',formatter(p){return p.map(x=>`${x.marker}${x.seriesName}: ${x.value.toFixed(2)}%`).join('<br>')}},legend:{bottom:0,data:['同期','当前','预警线'],textStyle:{fontSize:11}},grid:{top:15,right:25,bottom:38,left:45},xAxis:{type:'category',data:sync.map(d=>d.month),axisLabel:{fontSize:10},axisLine:{lineStyle:{color:'#e8ebf3'}},axisTick:{show:false}},yAxis:{type:'value',name:'%',min:70,max:95,interval:5,splitLine:{lineStyle:{color:'#f2f4f9'}},axisLabel:{fontSize:10}},series:[{name:'同期',type:'line',data:sync.map(d=>d.rate),smooth:true,lineStyle:{color:'#c0c7d6',width:2,type:'dashed'},itemStyle:{color:'#c0c7d6'},symbol:'circle',symbolSize:5},{name:'当前',type:'line',data:cur.map(d=>d.rate),smooth:true,lineStyle:{color:'#4f6ef7',width:2.5},itemStyle:{color:'#4f6ef7'},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(79,110,247,.06)'}},{name:'预警线',type:'line',data:Array(12).fill(85),lineStyle:{color:'#f25656',width:1.5,type:'dotted'},symbol:'none'}]})}
+function renderAttributionChart(attr){const chart=getChart('chartAttribution');if(!chart)return;const names=attr.map(d=>d.name).reverse();const vals=attr.map(d=>d.contrib).reverse();chart.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter(p){const d=attr.find(x=>x.name===p[0].name);return`${d.name}<br/>同期:${d.sync.toFixed(1)}万 → 当前:${d.cur.toFixed(1)}万<br/>变化:${d.delta>=0?'+':''}${d.delta.toFixed(1)}万 &nbsp; 贡献度:${d.contrib>=0?'+':''}${d.contrib}%`}},grid:{top:5,right:40,bottom:15,left:155},xAxis:{type:'value',name:'贡献度(%)',axisLabel:{fontSize:10,formatter:'{value}%'},splitLine:{lineStyle:{color:'#f2f4f9'}}},yAxis:{type:'category',data:names,axisLabel:{fontSize:10},axisTick:{show:false},axisLine:{show:false}},series:[{type:'bar',barMaxWidth:22,label:{show:true,position:'right',fontSize:10,formatter:'{c}%'},data:vals.map((v,i)=>({value:v,itemStyle:{color:vals[i]>=0?'#f25656':'#2ec4a7',borderRadius:vals[i]>=0?[0,4,4,0]:[4,0,0,4]}}))}]})}
+function renderFeeChart(fee){const chart=getChart('chartFeeType');if(!chart)return;chart.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},legend:{bottom:0,data:['同期','当前'],textStyle:{fontSize:10}},grid:{top:8,right:15,bottom:35,left:85},xAxis:{type:'value',name:'万元',axisLabel:{fontSize:10},splitLine:{lineStyle:{color:'#f2f4f9'}}},yAxis:{type:'category',data:fee.map(d=>d.name),axisLabel:{fontSize:10},axisTick:{show:false},axisLine:{show:false}},series:[{name:'同期',type:'bar',data:fee.map(d=>+d.sync.toFixed(1)),itemStyle:{color:'#dde1ed',borderRadius:[0,0,0,0]},barMaxWidth:14,barGap:'20%'},{name:'当前',type:'bar',data:fee.map(d=>+d.cur.toFixed(1)),itemStyle:{color:'#4f6ef7',borderRadius:[0,3,3,0]},barMaxWidth:14}]})}
+function renderHospChart(hospNature,hospLevel){const chart=getChart('chartHospital');if(!chart)return;const palette=['#4f6ef7','#7c5cfc','#3ec8d4','#f5a854','#2ec4a7','#f25656'];chart.setOption({tooltip:{trigger:'item',formatter:'{b}: {c}万元 ({d}%)'},legend:{bottom:0,data:[...hospLevel.map(d=>d.name),...hospNature.map(d=>d.name)],textStyle:{fontSize:9}},series:[{name:'医院等级',type:'pie',radius:['48%','65%'],center:['32%','46%'],label:{fontSize:9,formatter:'{b}\n{d}%'},emphasis:{label:{fontSize:13,fontWeight:'bold'}},data:hospLevel.map((d,i)=>({name:d.name,value:+d.cur.toFixed(1),itemStyle:{color:palette[i]}}))},{name:'医院性质',type:'pie',radius:['48%','65%'],center:['72%','46%'],label:{fontSize:9,formatter:'{b}\n{d}%'},emphasis:{label:{fontSize:13,fontWeight:'bold'}},data:hospNature.map((d,i)=>({name:d.name,value:+d.cur.toFixed(1),itemStyle:{color:palette[i]}}))}]})}
+function generateCaseFlow(){const base=[{stage:'立案中',syncCount:180,syncAmount:12.60,curCount:210,curAmount:15.40},{stage:'待审核',syncCount:350,syncAmount:28.40,curCount:420,curAmount:36.80},{stage:'复核中',syncCount:120,syncAmount:9.80,curCount:145,curAmount:12.60},{stage:'初审通过',syncCount:580,syncAmount:82.60,curCount:640,curAmount:96.40},{stage:'审核失败',syncCount:42,syncAmount:3.20,curCount:38,curAmount:2.80}];return base.map(d=>({...d,syncAvg:d.syncCount?+(d.syncAmount/d.syncCount).toFixed(4):0,curAvg:d.curCount?+(d.curAmount/d.curCount).toFixed(4):0}))}
+function renderCaseFlow(){const data=generateCaseFlow();const totals=data.reduce((s,d)=>({syncCount:s.syncCount+d.syncCount,syncAmount:s.syncAmount+d.syncAmount,curCount:s.curCount+d.curCount,curAmount:s.curAmount+d.curAmount}),{syncCount:0,syncAmount:0,curCount:0,curAmount:0});totals.syncAvg=totals.syncCount?+(totals.syncAmount/totals.syncCount).toFixed(4):0;totals.curAvg=totals.curCount?+(totals.curAmount/totals.curCount).toFixed(4):0;const fmt=v=>v.toFixed(2);const changeClass=(cur,sync)=>cur>sync?'delta-positive':(cur<sync?'delta-negative':'');let h=`<table><thead><tr><th style="text-align:left">案件状态</th><th>同期案件数</th><th>同期赔付金额(万)</th><th>同期均价(万/件)</th><th>当期案件数</th><th>当期赔付金额(万)</th><th>当期均价(万/件)</th></tr></thead><tbody>`;data.forEach(d=>{h+=`<tr><td style="text-align:left;font-weight:550">${d.stage}</td><td>${d.syncCount}</td><td>${fmt(d.syncAmount)}</td><td>${fmt(d.syncAvg)}</td><td class="${changeClass(d.curCount,d.syncCount)}">${d.curCount}</td><td class="${changeClass(d.curAmount,d.syncAmount)}">${fmt(d.curAmount)}</td><td class="${changeClass(d.curAvg,d.syncAvg)}">${fmt(d.curAvg)}</td></tr>`});h+=`<tr class="group-row" style="background:#f0f3ff"><td style="text-align:left"><strong>合计</strong></td><td><strong>${totals.syncCount}</strong></td><td><strong>${fmt(totals.syncAmount)}</strong></td><td><strong>${fmt(totals.syncAvg)}</strong></td><td><strong>${totals.curCount}</strong></td><td><strong>${fmt(totals.curAmount)}</strong></td><td><strong>${fmt(totals.curAvg)}</strong></td></tr>`;h+='</tbody></table>';document.getElementById('caseFlowTable').innerHTML=h}
+function renderTable(details,tab){const rows=[];const add=(data)=>{if(!data.length)return;const ts=data.reduce((s,d)=>s+d.sync,0),tc=data.reduce((s,d)=>s+d.cur,0);rows.push({type:'group',cat:data[0].cat,name:data[0].cat+' 合计',sync:ts,cur:tc,delta:tc-ts,sr:ts/420*100,cr:tc/482*100});data.forEach(d=>rows.push({type:'item',...d,delta:d.cur-d.sync}))};if(tab==='all'||tab==='visit')add(details.visit);if(tab==='all'||tab==='hospital'){add(details.hospNature);add(details.hospLevel)}if(tab==='all'||tab==='drug')add(details.drug);if(tab==='all'||tab==='fee')add(details.fee);if(tab==='all'||tab==='deduct')add(details.deduct);let h=`<table><thead><tr><th>项目</th><th>同期赔款(万元)</th><th>同期占比</th><th>当前赔款(万元)</th><th>当前占比</th><th>差额(万元)</th><th>变化率</th></tr></thead><tbody>`;rows.forEach(r=>{const dc=r.delta>0?'delta-positive':(r.delta<0?'delta-negative':'');const chg=r.sync>0?(r.cur-r.sync)/r.sync*100:0;const rc=chg>10?'rate-high':(chg>5?'rate-warn':'rate-ok');if(r.type==='group'){h+=`<tr class="group-row"><td>${r.name}</td><td><strong>${r.sync.toFixed(2)}</strong></td><td><strong>${r.sr.toFixed(2)}%</strong></td><td><strong>${r.cur.toFixed(2)}</strong></td><td><strong>${r.cr.toFixed(2)}%</strong></td><td class="${dc}"><strong>${r.delta>=0?'+':''}${r.delta.toFixed(2)}</strong></td><td class="rate-cell ${rc}">${chg>=0?'+':''}${chg.toFixed(1)}%</td></tr>`}else{h+=`<tr><td style="padding-left:26px">${r.name}</td><td>${r.sync.toFixed(2)}</td><td>${r.sr.toFixed(2)}%</td><td>${r.cur.toFixed(2)}</td><td>${r.cr.toFixed(2)}%</td><td class="${dc}">${r.delta>=0?'+':''}${r.delta.toFixed(2)}</td><td class="rate-cell ${rc}">${chg>=0?'+':''}${chg.toFixed(1)}%</td></tr>`}});h+=`<tr class="group-row" style="background:#f0f3ff"><td>总计</td><td><strong>420.00</strong></td><td><strong>100%</strong></td><td><strong>482.00</strong></td><td><strong>100%</strong></td><td class="delta-positive"><strong>+62.00</strong></td><td class="rate-cell rate-warn"><strong>+14.8%</strong></td></tr>`;h+='</tbody></table>';document.getElementById('detailTable').innerHTML=h}
+let tooltipEl=null,tipTimer=null,tipTarget=null;
+function ensureTipEl(){if(!tooltipEl){tooltipEl=document.createElement('div');tooltipEl.className='tooltip-popup';document.body.appendChild(tooltipEl)}}
+function showTip(el){ensureTipEl();clearTimeout(tipTimer);const t=el.dataset.tip,r=el.dataset.rules;tooltipEl.innerHTML=t+(r?`<div class="tip-rules">${r}</div>`:'');tooltipEl.classList.remove('show');const rect=el.getBoundingClientRect();const vw=window.innerWidth;let left=rect.left+rect.width/2;const minLeft=190,maxLeft=vw-190;if(left<minLeft)left=minLeft;if(left>maxLeft)left=maxLeft;tooltipEl.style.left=left+'px';tooltipEl.style.top=(rect.top-10)+'px';requestAnimationFrame(()=>tooltipEl.classList.add('show'))}
+function hideTip(){tipTimer=setTimeout(()=>{if(!document.querySelector('.info-tip:hover')){if(tooltipEl)tooltipEl.classList.remove('show')}},120)}
+document.addEventListener('mouseenter',e=>{const tip=e.target.closest('.info-tip');if(tip&&tip!==tipTarget){tipTarget=tip;showTip(tip)}},true);
+document.addEventListener('mouseleave',e=>{const tip=e.target.closest('.info-tip');if(tip){tipTarget=null;hideTip()}},true);
+function switchTableTab(tab,el){currentTab=tab;document.querySelectorAll('.table-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderTable(generateDetails(),tab)}
+function refreshData(){renderAll()}
+function resetFilters(){document.getElementById('filterService').value='';document.getElementById('filterCompany').value='';document.getElementById('filterLeader').value='';document.getElementById('filterBigHat').value='';document.getElementById('filterContractParty').value='';document.getElementById('filterPayer').value='';document.getElementById('filterYear').value='2024';document.getElementById('filterMonth').value='6';document.getElementById('filterCompareYear').value='2023';refreshData()}
+async function runAIAnalysis(){const btn=document.getElementById('aiAnalyzeBtn');const analysisEl=document.getElementById('aiAnalysis');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> AI分析中...';analysisEl.innerHTML=`<div class="ai-placeholder"><div class="ai-placeholder-icon">⏳</div><div class="ai-placeholder-text">正在调用 AI 大模型进行理赔数据分析，请稍候...</div></div>`;const kpi=generateKPI();const details=generateDetails();const attr=generateAttribution(details);try{if(!AI_CONFIG.apiKey){throw new Error('API_KEY_EMPTY')}const response=await fetch(AI_CONFIG.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${AI_CONFIG.apiKey}`},body:JSON.stringify({model:AI_CONFIG.model,messages:[{role:'system',content:'你是一个专业的保险理赔数据分析师，输出使用 Markdown 格式，结论必须基于数据，不要编造。'},{role:'user',content:'请分析理赔数据'}],max_tokens:AI_CONFIG.maxTokens,temperature:AI_CONFIG.temperature})});if(!response.ok){const errBody=await response.text();throw new Error(`HTTP ${response.status}: ${errBody.slice(0,200)}`)}const data=await response.json();const aiText=data.choices?.[0]?.message?.content;if(!aiText){throw new Error('AI 返回内容为空')}analysisEl.innerHTML=markdownToHtml(aiText)}catch(err){console.error('AI分析调用失败:',err);if(err.message==='API_KEY_EMPTY'){await new Promise(r=>setTimeout(r,1200));analysisEl.innerHTML=`<div class="ai-section"><div class="ai-section-title">整体结论</div><p style="line-height:2;font-size:13px">当前查询范围内，理赔率<span class="ai-tag red">上升 3.32pp</span>，从同期 <b>84.00%</b> 变为当前 <b>87.32%</b>。已用赔款增加 <b>62万</b>，应支保费增加 <b>520万</b>，赔款增速（14.8%）<span class="ai-tag red">高于</span>保费增速（10.4%），是理赔率上升的核心原因。</p></div><div class="ai-section"><div class="ai-section-title">关键指标</div><div class="ai-bullet"><b>预算消耗</b>：已用 482万 / 可用 552万，消耗率 <span class="ai-tag red">87.3%</span>。</div><div class="ai-bullet"><b>案件单价</b>：已结案案件平均赔付单价约 0.3317万/件，同期约 0.3302万/件，单件赔付金额上升。</div></div><div class="ai-section"><div class="ai-section-title">增长归因（按贡献额 Top3）</div><div class="ai-bullet"><b>1. 住院赔款</b>：同期 200.00万 → 当前 282.00万，增加 <span class="ai-tag red">+82.00万</span>（+41.0%），对总赔款增量贡献度 132.3%</div><div class="ai-bullet"><b>2. 西药</b>：同期 156.80万 → 当前 186.20万，增加 <span class="ai-tag red">+29.40万</span>（+18.7%），对总赔款增量贡献度 47.4%</div><div class="ai-bullet"><b>3. 西医治疗</b>：同期 88.40万 → 当前 102.60万，增加 <span class="ai-tag red">+14.20万</span>（+16.1%），对总赔款增量贡献度 22.9%</div></div><div class="ai-section"><div class="ai-section-title">下降/抑制因素</div><div class="ai-bullet"><b>1. 门诊赔款</b>：同期 220.00万 → 当前 200.00万，减少 <span class="ai-tag green">-20.00万</span>（-9.1%）</div><div class="ai-bullet"><b>2. 中草药</b>：同期 32.00万 → 当前 22.00万，减少 <span class="ai-tag green">-10.00万</span>（-31.3%）</div></div><div class="ai-section"><div class="ai-section-title">关键风险</div><p style="padding-left:16px;line-height:2;font-size:13px">• 理赔率 87.32%（同期 84.00%）已突破85%预警线，属高风险。</p><p style="padding-left:16px;line-height:2;font-size:13px">• 赔款消耗率 87.3%，预算压力较大。</p><p style="padding-left:16px;line-height:2;font-size:13px">• 住院赔款 增速 41.0%，超过15%异常阈值。</p><p style="padding-left:16px;line-height:2;font-size:13px">• 西药 增速 18.7%，超过15%异常阈值。</p></div><div class="ai-section"><div class="ai-section-title">管控建议</div><p style="padding-left:16px;line-height:2;font-size:13px">1. 针对 <b>住院赔款</b>（+82.00万，贡献132.3%）开展专项审计，抽取大额案件核实诊疗合理性。</p><p style="padding-left:16px;line-height:2;font-size:13px">2. 关注私立医院赔款结构变化（占比 28.3%，较同期 25.9%），对单院增长率超20%的机构启动复核。</p><p style="padding-left:16px;line-height:2;font-size:13px">3. 针对 西药、西医治疗、检查费 等增长较快的明细项，设定同比+10%预警阈值自动触发审核。</p><p style="padding-left:16px;line-height:2;font-size:13px">4. 当前消耗率 87.3%，建议按月度拆分可用赔款预算，对单笔超10万案件实行预审批。</p><p style="padding-left:16px;line-height:2;font-size:13px">5. 案件均价已从 0.3302万 升至 0.3317万，需排查是病情复杂度上升还是过度治疗所致。</p></div><hr style="border:none;border-top:1px dashed #e8ebf3;margin:12px 0"><div style="font-size:11px;color:#949aad;background:#f9fafc;padding:6px 10px;border-radius:4px">分析覆盖 25 个明细项 | 增长 20 项、下降 5 项 | ${new Date().toLocaleString('zh-CN')}</div>`}else{analysisEl.innerHTML='<div class="ai-error"><div class="ai-error-title">⚠️ AI 调用失败，已切换为本地分析</div><div class="ai-error-detail">'+err.message+'</div></div>'}}finally{btn.disabled=false;btn.innerHTML='<span class="ai-btn-icon">⚡</span> 调用AI分析'}}
+function markdownToHtml(md){let html=md.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/^### (.+)$/gm,'<div class="ai-section-title">$1</div>').replace(/^## (.+)$/gm,'<div class="ai-section-title" style="font-size:14px">$1</div>').replace(/^# (.+)$/gm,'<div class="ai-section-title" style="font-size:15px;color:var(--blue)">$1</div>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code style="background:#eef1fe;color:var(--blue);padding:1px 5px;border-radius:3px;font-size:12px">$1</code>').replace(/^- (.+)$/gm,'<div class="ai-bullet">$1</div>').replace(/^• (.+)$/gm,'<div class="ai-bullet">$1</div>').replace(/^---$/gm,'<hr class="ai-divider">').replace(/\n\n/g,'</div><div class="ai-section">').replace(/\n/g,'<br>');html='<div class="ai-section">'+html+'</div>';html=html.replace(/<div class="ai-section"><\/div>/g,'');html=html.replace(/<div class="ai-section"><br><\/div>/g,'');return html}
+function renderAll(){const kpi=generateKPI();const details=generateDetails();const attr=generateAttribution(details);renderKPIs(kpi);renderAlertsSection(kpi,details);renderTrend();renderAttributionChart(attr);renderFeeChart(details.fee);renderHospChart(details.hospNature,details.hospLevel);renderTable(details,currentTab);renderCaseFlow();document.getElementById('aiAnalysis').innerHTML=`<div class="ai-placeholder"><div class="ai-placeholder-icon">🤖</div><div class="ai-placeholder-text">当前数据已就绪，点击右上角<b>「⚡ 调用AI分析」</b>按钮，AI 大模型将根据当前页面所有数据自动生成理赔归因分析报告。</div></div>`;document.getElementById('aiPromptDetail').style.display='none';document.getElementById('aiPromptDetail').textContent=''}
+window.onload=()=>{renderAll()};
+window.addEventListener('resize',()=>Object.values(chartInstances).forEach(c=>c.resize()));
+</script>
+<script src="js/common.js"></script>
+</body>
+</html>

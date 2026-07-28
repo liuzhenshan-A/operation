@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>保费账期分析明细</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+  <script src="https://npmcdn.com/flatpickr@4.6.13/dist/l10n/zh.js"></script>
+  <style>
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      color: #666;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .back-btn:hover {
+      color: #1890ff;
+      border-color: #1890ff;
+    }
+    .detail-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    .search-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      align-items: center;
+    }
+    .search-form .form-item {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .search-form .form-item label {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      color: #555;
+      white-space: nowrap;
+      margin-right: 6px;
+    }
+    .search-form .form-item input,
+    .search-form .form-item select {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      padding: 6px 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+      min-width: 140px;
+      height: 32px;
+      box-sizing: border-box;
+      background: #fff;
+      transition: all 0.2s;
+    }
+    .search-form .form-item input:focus,
+    .search-form .form-item select:focus {
+      outline: none;
+      border-color: #1890ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+    }
+    .search-form .form-item input::placeholder {
+      color: #bfbfbf;
+      font-size: 14px;
+    }
+    .search-form .form-item .range-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-form .form-item .range-group input {
+      width: 110px;
+      min-width: 110px;
+    }
+    .search-form .form-item .range-sep {
+      color: #999;
+      font-size: 12px;
+    }
+    .search-form .form-item.action-buttons {
+      margin-left: auto;
+      gap: 8px;
+    }
+    .search-form .form-item.action-buttons .search-btn {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      padding: 6px 20px;
+      font-size: 14px;
+      border-radius: 4px;
+      height: 32px;
+    }
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .table-info {
+      color: #666;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+    }
+    .export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(82, 196, 26, 0.3);
+    }
+    .export-btn:hover {
+      background: linear-gradient(135deg, #73d13d 0%, #52c41a 100%);
+      box-shadow: 0 4px 8px rgba(82, 196, 26, 0.4);
+      transform: translateY(-1px);
+    }
+    .status-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-tag.verified {
+      background: #f6ffed;
+      color: #52c41a;
+      border: 1px solid #b7eb8f;
+    }
+    .status-tag.unverified {
+      background: #fff7e6;
+      color: #fa8c16;
+      border: 1px solid #ffd591;
+    }
+    .status-tag.partial {
+      background: #e6f4ff;
+      color: #1890ff;
+      border: 1px solid #91d5ff;
+    }
+    .pagination {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      padding: 12px 0;
+    }
+    .pagination button {
+      padding: 6px 12px;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      color: #555;
+      transition: all 0.2s;
+    }
+    .pagination button:hover:not(:disabled) {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+    .pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .pagination button.active {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .pagination .page-info {
+      color: #666;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      margin-right: 12px;
+    }
+    .text-center { text-align: center; }
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+    }
+    .data-table th {
+      background: #fafbfc;
+      font-weight: 600;
+      color: #555;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 2px solid #e8e8e8;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+    }
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+      white-space: nowrap;
+    }
+    .data-table tbody tr:hover {
+      background: #f5f9ff;
+    }
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table .text-right {
+      text-align: right;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    }
+    .data-table .text-center {
+      text-align: center;
+    }
+    .range-group .flatpickr-input {
+      width: 110px;
+      min-width: 110px;
+      padding: 6px 10px !important;
+      border: 1px solid #d9d9d9 !important;
+      border-radius: 4px !important;
+      font-size: 13px !important;
+      height: 32px !important;
+      line-height: 20px !important;
+      box-sizing: border-box;
+      background: #fff !important;
+      color: #333 !important;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .range-group .flatpickr-input:hover {
+      border-color: #1890ff !important;
+    }
+    .range-group .flatpickr-input:focus {
+      outline: none !important;
+      border-color: #1890ff !important;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1) !important;
+    }
+    .flatpickr-calendar {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+      border-radius: 8px !important;
+      padding: 8px !important;
+    }
+    .flatpickr-calendar .flatpickr-month {
+      background: transparent !important;
+      color: #333 !important;
+      height: 36px !important;
+      line-height: 36px !important;
+    }
+    .flatpickr-calendar .flatpickr-current-month {
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      color: #1a1a2e !important;
+      padding: 0 !important;
+      top: 0 !important;
+    }
+    .flatpickr-calendar .flatpickr-current-month .flatpickr-monthDropdown-months,
+    .flatpickr-calendar .flatpickr-current-month input.cur-year {
+      font-weight: 600 !important;
+      color: #1a1a2e !important;
+    }
+    .flatpickr-calendar .flatpickr-weekdays {
+      background: transparent !important;
+    }
+    .flatpickr-calendar .flatpickr-weekday {
+      color: #999 !important;
+      font-weight: 500 !important;
+      font-size: 12px !important;
+    }
+    .flatpickr-calendar .flatpickr-day {
+      border-radius: 4px !important;
+      color: #555 !important;
+    }
+    .flatpickr-calendar .flatpickr-day:hover,
+    .flatpickr-calendar .flatpickr-day.flatpickr-day-prevMonth:hover,
+    .flatpickr-calendar .flatpickr-day.flatpickr-day-nextMonth:hover {
+      background: #e6f4ff !important;
+      color: #1890ff !important;
+      border-color: transparent !important;
+    }
+    .flatpickr-calendar .flatpickr-day.selected,
+    .flatpickr-calendar .flatpickr-day.selected:hover,
+    .flatpickr-calendar .flatpickr-day.today {
+      background: #1890ff !important;
+      color: #fff !important;
+      border-color: #1890ff !important;
+    }
+    .flatpickr-calendar .flatpickr-day.today:not(.selected) {
+      border-color: #1890ff !important;
+      color: #1890ff !important;
+      background: #fff !important;
+    }
+    .flatpickr-calendar .flatpickr-day.prevMonthDay,
+    .flatpickr-calendar .flatpickr-day.nextMonthDay {
+      color: #ccc !important;
+    }
+    .flatpickr-calendar .flatpickr-months,
+    .flatpickr-calendar .flatpickr-weekdays,
+    .flatpickr-calendar .flatpickr-weekday {
+      fill: #999 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">📊</div>
+        <h1>运营工作台</h1>
+      </div>
+      <nav id="sidebar-menu"></nav>
+    </aside>
+    <div class="main-content">
+      <div class="page-header">
+        <div class="detail-header">
+          <a href="premium.html" class="back-btn">← 返回</a>
+          <h2 id="page-title">保费明细</h2>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-title">查询条件</div>
+          <form class="search-form" onsubmit="return false">
+            <div class="form-item">
+              <label>团单号码</label>
+              <input type="text" id="groupNo" placeholder="请输入团单号码">
+            </div>
+            <div class="form-item">
+              <label>付款方名称</label>
+              <input type="text" id="payerName" placeholder="请输入付款方名称">
+            </div>
+            <div class="form-item">
+              <label>核销状态</label>
+              <select id="verifyStatus">
+                <option value="">全部</option>
+                <option value="verified">已核销</option>
+                <option value="unverified">未核销</option>
+                <option value="partial">部分核销</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>保险类别</label>
+              <select id="insuranceType">
+                <option value="">全部</option>
+                <option value="supplement">补充医疗</option>
+                <option value="employer">雇主</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>账单月份</label>
+              <div class="range-group">
+                <input type="text" id="startBillMonth" placeholder="开始月份" readonly>
+                <span class="range-sep">至</span>
+                <input type="text" id="endBillMonth" placeholder="结束月份" readonly>
+              </div>
+            </div>
+            <div class="form-item">
+              <label>所属客服</label>
+              <input type="text" id="customerService" placeholder="请输入客服姓名">
+            </div>
+            <div class="form-item action-buttons">
+              <button type="button" class="search-btn" onclick="searchData()">查询</button>
+              <button type="button" class="search-btn" style="background:#d9d9d9" onclick="resetForm()">重置</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="table-toolbar">
+            <div class="table-info">共 <span id="totalCount">0</span> 条数据</div>
+            <button type="button" class="export-btn" onclick="exportData()">
+              <span>📥</span> 导出数据
+            </button>
+          </div>
+          <div style="overflow-x: auto">
+            <table class="data-table" id="detailTable">
+              <thead>
+                <tr>
+                  <th>团单号码</th>
+                  <th>付款方名称</th>
+                  <th>所属客服</th>
+                  <th>账单类型</th>
+                  <th>保险类型</th>
+                  <th>账单月份</th>
+                  <th style="text-align:right">应缴保费(元)</th>
+                  <th style="text-align:right">已缴保费(元)</th>
+                  <th style="text-align:right">保费差额(元)</th>
+                  <th style="text-align:center">员工人数</th>
+                  <th style="text-align:center">连带人数</th>
+                  <th>核销状态</th>
+                  <th style="text-align:right">核销金额(元)</th>
+                </tr>
+              </thead>
+              <tbody id="detailTableBody">
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    var mockData = [];
+    var currentPage = 1;
+    var pageSize = 10;
+
+    function generateMockData() {
+      var groupNos = ['GD202607001', 'GD202607002', 'GD202607003', 'GD202607004', 'GD202607005', 'GD202606001', 'GD202606002', 'GD202605001', 'GD202605002', 'GD202604001', 'GD202604002', 'GD202603001', 'GD202602001', 'GD202601001', 'GD202512001'];
+      var payers = ['北京科技有限公司', '上海贸易集团', '广州制造企业', '深圳创新科技', '杭州互联网公司', '成都物流集团', '武汉建筑工程', '南京金融服务', '西安能源集团', '重庆汽车制造'];
+      var customerServices = ['张伟', '李娜', '王芳', '刘洋', '陈静', '赵强', '孙丽', '周杰', '吴敏', '郑涛'];
+      var billTypes = ['续期', '新契约'];
+      var insuranceTypes = ['补充医疗', '雇主责任险', '团体意外险', '大额医疗险'];
+      var months = ['2026-07', '2026-06', '2026-05', '2026-04', '2026-03', '2026-02', '2026-01'];
+      var statuses = ['verified', 'unverified', 'partial'];
+
+      var data = [];
+      for (var i = 0; i < 50; i++) {
+        var billType = billTypes[Math.floor(Math.random() * billTypes.length)];
+        var insuranceType = insuranceTypes[Math.floor(Math.random() * insuranceTypes.length)];
+        var month = months[Math.floor(Math.random() * months.length)];
+        var status = statuses[Math.floor(Math.random() * statuses.length)];
+        var totalPremium = Math.floor(Math.random() * 50000) + 5000;
+        var paidPremium = status === 'verified' ? totalPremium : status === 'partial' ? Math.floor(totalPremium * 0.6) : 0;
+        var diff = totalPremium - paidPremium;
+        var verifyAmount = status === 'verified' ? totalPremium : status === 'partial' ? Math.floor(totalPremium * 0.5) : 0;
+
+        data.push({
+          groupNo: groupNos[i % groupNos.length],
+          payerName: payers[Math.floor(Math.random() * payers.length)],
+          customerService: customerServices[Math.floor(Math.random() * customerServices.length)],
+          billType: billType,
+          insuranceType: insuranceType,
+          billMonth: month,
+          totalPremium: totalPremium.toLocaleString(),
+          paidPremium: paidPremium.toLocaleString(),
+          diff: diff.toLocaleString(),
+          employeeCount: Math.floor(Math.random() * 500) + 50,
+          dependentCount: Math.floor(Math.random() * 200) + 10,
+          verifyStatus: status,
+          verifyAmount: verifyAmount.toLocaleString()
+        });
+      }
+      return data;
+    }
+
+    function getStatusText(status) {
+      var map = {
+        'verified': '<span class="status-tag verified">已核销</span>',
+        'unverified': '<span class="status-tag unverified">未核销</span>',
+        'partial': '<span class="status-tag partial">部分核销</span>'
+      };
+      return map[status] || status;
+    }
+
+    function renderTable() {
+      var filteredData = filterData(mockData);
+      var total = filteredData.length;
+      var totalPages = Math.ceil(total / pageSize);
+      var start = (currentPage - 1) * pageSize;
+      var end = start + pageSize;
+      var pageData = filteredData.slice(start, end);
+
+      var tbody = document.getElementById('detailTableBody');
+      var html = '';
+
+      if (pageData.length === 0) {
+        html = '<tr><td colspan="13" class="text-center" style="padding:40px;color:#999">暂无数据</td></tr>';
+      } else {
+        pageData.forEach(function(item) {
+          html += '<tr>';
+          html += '<td>' + item.groupNo + '</td>';
+          html += '<td>' + item.payerName + '</td>';
+          html += '<td>' + item.customerService + '</td>';
+          html += '<td>' + item.billType + '</td>';
+          html += '<td>' + item.insuranceType + '</td>';
+          html += '<td>' + item.billMonth + '</td>';
+          html += '<td class="text-right">' + item.totalPremium + '</td>';
+          html += '<td class="text-right">' + item.paidPremium + '</td>';
+          html += '<td class="text-right">' + item.diff + '</td>';
+          html += '<td class="text-center">' + item.employeeCount + '</td>';
+          html += '<td class="text-center">' + item.dependentCount + '</td>';
+          html += '<td>' + getStatusText(item.verifyStatus) + '</td>';
+          html += '<td class="text-right">' + item.verifyAmount + '</td>';
+          html += '</tr>';
+        });
+      }
+
+      tbody.innerHTML = html;
+      document.getElementById('totalCount').textContent = total;
+      renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+      var container = document.getElementById('pagination');
+      var html = '<span class="page-info">第 ' + currentPage + ' / ' + totalPages + ' 页</span>';
+      html += '<button onclick="goToPage(1)" ' + (currentPage === 1 ? 'disabled' : '') + '>首页</button>';
+      html += '<button onclick="goToPage(' + (currentPage - 1) + ')" ' + (currentPage === 1 ? 'disabled' : '') + '>上一页</button>';
+      
+      var startPage = Math.max(1, currentPage - 2);
+      var endPage = Math.min(totalPages, startPage + 4);
+      if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+      
+      for (var i = startPage; i <= endPage; i++) {
+        html += '<button class="' + (i === currentPage ? 'active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+      }
+      
+      html += '<button onclick="goToPage(' + (currentPage + 1) + ')" ' + (currentPage === totalPages ? 'disabled' : '') + '>下一页</button>';
+      html += '<button onclick="goToPage(' + totalPages + ')" ' + (currentPage === totalPages ? 'disabled' : '') + '>末页</button>';
+      container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      var filteredData = filterData(mockData);
+      var totalPages = Math.ceil(filteredData.length / pageSize);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderTable();
+    }
+
+    function filterData(data) {
+      var groupNo = document.getElementById('groupNo').value.trim();
+      var payerName = document.getElementById('payerName').value.trim();
+      var verifyStatus = document.getElementById('verifyStatus').value;
+      var insuranceType = document.getElementById('insuranceType').value;
+      var startBillMonth = document.getElementById('startBillMonth').value;
+      var endBillMonth = document.getElementById('endBillMonth').value;
+      var customerService = document.getElementById('customerService').value.trim();
+
+      return data.filter(function(item) {
+        if (groupNo && item.groupNo.indexOf(groupNo) === -1) return false;
+        if (payerName && item.payerName.indexOf(payerName) === -1) return false;
+        if (verifyStatus && item.verifyStatus !== verifyStatus) return false;
+        if (insuranceType && item.insuranceType.indexOf(insuranceType) === -1) return false;
+        if (startBillMonth && item.billMonth < startBillMonth) return false;
+        if (endBillMonth && item.billMonth > endBillMonth) return false;
+        if (customerService && item.customerService.indexOf(customerService) === -1) return false;
+        return true;
+      });
+    }
+
+    function searchData() {
+      currentPage = 1;
+      renderTable();
+    }
+
+    function exportData() {
+      var filteredData = filterData(mockData);
+      if (filteredData.length === 0) {
+        alert('暂无数据可导出');
+        return;
+      }
+
+      var headers = ['团单号码', '付款方名称', '所属客服', '账单类型', '保险类型', '账单月份', '应缴保费(元)', '已缴保费(元)', '保费差额(元)', '员工人数', '连带人数', '核销状态', '核销金额(元)'];
+      var rows = [headers.join(',')];
+      
+      filteredData.forEach(function(item) {
+        var statusText = item.verifyStatus === 'verified' ? '已核销' : item.verifyStatus === 'unverified' ? '未核销' : '部分核销';
+        var row = [
+          item.groupNo,
+          '"' + item.payerName + '"',
+          item.customerService,
+          item.billType,
+          item.insuranceType,
+          item.billMonth,
+          item.totalPremium,
+          item.paidPremium,
+          item.diff,
+          item.employeeCount,
+          item.dependentCount,
+          statusText,
+          item.verifyAmount
+        ];
+        rows.push(row.join(','));
+      });
+
+      var csvContent = '\uFEFF' + rows.join('\n');
+      var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      var url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', '保费明细_' + new Date().toISOString().slice(0, 10) + '.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    var startPicker, endPicker;
+
+    function initFlatpickr() {
+      var fpOpts = {
+        locale: "zh",
+        dateFormat: "Y-m",
+        mode: "single",
+        defaultDate: null,
+        allowInput: false,
+        clickOpens: true
+      };
+      startPicker = flatpickr("#startBillMonth", fpOpts);
+      endPicker = flatpickr("#endBillMonth", fpOpts);
+    }
+
+    function init() {
+      mockData = generateMockData();
+      initFlatpickr();
+      renderTable();
+    }
+
+    function resetForm() {
+      document.getElementById('groupNo').value = '';
+      document.getElementById('payerName').value = '';
+      document.getElementById('verifyStatus').selectedIndex = 0;
+      document.getElementById('insuranceType').selectedIndex = 0;
+      document.getElementById('customerService').value = '';
+      if (startPicker) startPicker.clear();
+      if (endPicker) endPicker.clear();
+      currentPage = 1;
+      renderTable();
+    }
+
+    window.addEventListener('load', function() {
+      init();
+    });
+  </script>
+</body>
+</html>

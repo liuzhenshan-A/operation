@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>续签明细</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+  <script src="https://npmcdn.com/flatpickr@4.6.13/dist/l10n/zh.js"></script>
+  <style>
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      color: #666;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .back-btn:hover {
+      color: #1890ff;
+      border-color: #1890ff;
+    }
+    .detail-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    .search-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      align-items: center;
+    }
+    .search-form .form-item {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .search-form .form-item label {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      color: #555;
+      white-space: nowrap;
+      margin-right: 6px;
+    }
+    .search-form .form-item input,
+    .search-form .form-item select {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      padding: 6px 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+      min-width: 140px;
+      height: 32px;
+      box-sizing: border-box;
+      background: #fff;
+      transition: all 0.2s;
+    }
+    .search-form .form-item input:focus,
+    .search-form .form-item select:focus {
+      outline: none;
+      border-color: #1890ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+    }
+    .search-form .form-item input::placeholder {
+      color: #bfbfbf;
+      font-size: 14px;
+    }
+    .search-form .form-item .range-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-form .form-item .range-group input {
+      width: 110px;
+      min-width: 110px;
+    }
+    .search-form .form-item .range-sep {
+      color: #999;
+      font-size: 12px;
+    }
+    .search-form .form-item.action-buttons {
+      margin-left: auto;
+      gap: 8px;
+    }
+    .search-form .form-item.action-buttons .search-btn {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      padding: 6px 20px;
+      font-size: 14px;
+      border-radius: 4px;
+      height: 32px;
+    }
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .table-info {
+      color: #666;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+    }
+    .export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(82, 196, 26, 0.3);
+    }
+    .export-btn:hover {
+      background: linear-gradient(135deg, #73d13d 0%, #52c41a 100%);
+      box-shadow: 0 4px 8px rgba(82, 196, 26, 0.4);
+      transform: translateY(-1px);
+    }
+    .status-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-tag.success {
+      background: #f6ffed;
+      color: #52c41a;
+      border: 1px solid #b7eb8f;
+    }
+    .status-tag.warning {
+      background: #fff7e6;
+      color: #fa8c16;
+      border: 1px solid #ffd591;
+    }
+    .status-tag.danger {
+      background: #fff2f0;
+      color: #f5222d;
+      border: 1px solid #ffccc7;
+    }
+    .data-table a {
+      color: #1890ff;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .data-table a:hover {
+      color: #40a9ff;
+      text-decoration: underline;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 900px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .modal-header h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #999;
+      padding: 0 4px;
+    }
+    .modal-close:hover {
+      color: #333;
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .modal-footer .export-btn {
+      padding: 6px 16px;
+      font-size: 13px;
+    }
+    .pagination {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      padding: 12px 0;
+    }
+    .pagination button {
+      padding: 6px 12px;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      color: #555;
+      transition: all 0.2s;
+    }
+    .pagination button:hover:not(:disabled) {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+    .pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .pagination button.active {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .pagination .page-info {
+      color: #666;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      margin-right: 12px;
+    }
+    .text-center { text-align: center; }
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+    }
+    .data-table th {
+      background: #fafbfc;
+      font-weight: 600;
+      color: #555;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 2px solid #e8e8e8;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+    }
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+      white-space: nowrap;
+    }
+    .data-table tbody tr:hover {
+      background: #f5f9ff;
+    }
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table .text-right {
+      text-align: right;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    }
+    .data-table .text-center {
+      text-align: center;
+    }
+    .flatpickr-calendar {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+      border-radius: 8px !important;
+      padding: 8px !important;
+    }
+    .flatpickr-calendar .flatpickr-month {
+      background: transparent !important;
+      color: #333 !important;
+      height: 36px !important;
+      line-height: 36px !important;
+    }
+    .flatpickr-calendar .flatpickr-current-month {
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      color: #1a1a2e !important;
+      padding: 0 !important;
+      top: 0 !important;
+    }
+    .flatpickr-calendar .flatpickr-current-month .flatpickr-monthDropdown-months,
+    .flatpickr-calendar .flatpickr-current-month input.cur-year {
+      font-weight: 600 !important;
+      color: #1a1a2e !important;
+    }
+    .flatpickr-calendar .flatpickr-weekdays {
+      background: transparent !important;
+    }
+    .flatpickr-calendar .flatpickr-weekday {
+      color: #999 !important;
+      font-weight: 500 !important;
+      font-size: 12px !important;
+    }
+    .flatpickr-calendar .flatpickr-day {
+      border-radius: 4px !important;
+      color: #555 !important;
+    }
+    .flatpickr-calendar .flatpickr-day:hover,
+    .flatpickr-calendar .flatpickr-day.flatpickr-day-prevMonth:hover,
+    .flatpickr-calendar .flatpickr-day.flatpickr-day-nextMonth:hover {
+      background: #e6f4ff !important;
+      color: #1890ff !important;
+      border-color: transparent !important;
+    }
+    .flatpickr-calendar .flatpickr-day.selected,
+    .flatpickr-calendar .flatpickr-day.selected:hover,
+    .flatpickr-calendar .flatpickr-day.today {
+      background: #1890ff !important;
+      color: #fff !important;
+      border-color: #1890ff !important;
+    }
+    .flatpickr-calendar .flatpickr-day.today:not(.selected) {
+      border-color: #1890ff !important;
+      color: #1890ff !important;
+      background: #fff !important;
+    }
+    .flatpickr-calendar .flatpickr-day.prevMonthDay,
+    .flatpickr-calendar .flatpickr-day.nextMonthDay {
+      color: #ccc !important;
+    }
+    .flatpickr-calendar .flatpickr-months,
+    .flatpickr-calendar .flatpickr-weekdays,
+    .flatpickr-calendar .flatpickr-weekday {
+      fill: #999 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">🔄</div>
+        <h1>运营工作台</h1>
+      </div>
+      <nav id="sidebar-menu"></nav>
+    </aside>
+    <div class="main-content">
+      <div class="page-header">
+        <div class="detail-header">
+          <a href="renewal.html" class="back-btn">← 返回</a>
+          <h2 id="page-title">续签明细</h2>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="card">
+          <div class="card-title">查询条件</div>
+          <form class="search-form" onsubmit="return false">
+            <div class="form-item">
+              <label>截止年月</label>
+              <input type="month" id="endDate" value="">
+            </div>
+            <div class="form-item">
+              <label>保险类别</label>
+              <select id="insuranceType">
+                <option value="">全部</option>
+                <option value="employer">雇主</option>
+                <option value="supplement">补充</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>所属客服</label>
+              <input type="text" id="customerService" placeholder="请输入所属客服">
+            </div>
+            <div class="form-item">
+              <label>续签状态</label>
+              <select id="renewalStatus">
+                <option value="">全部</option>
+                <option value="success">正常</option>
+                <option value="warning">预警</option>
+                <option value="danger">异常</option>
+              </select>
+            </div>
+            <div class="form-item action-buttons">
+              <button type="button" class="search-btn" onclick="searchData()">查询</button>
+              <button type="button" class="search-btn" style="background:#d9d9d9" onclick="resetForm()">重置</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="table-toolbar">
+            <div class="table-info">共 <span id="totalCount">0</span> 条数据</div>
+            <button type="button" class="export-btn" onclick="exportData()">
+              <span>📥</span> 导出数据
+            </button>
+          </div>
+          <div style="overflow-x: auto">
+            <table class="data-table" id="detailTable">
+              <thead>
+                <tr>
+                  <th>到期月份</th>
+                  <th>保险类别</th>
+                  <th>所属客服</th>
+                  <th style="text-align:right">应收保费(万)</th>
+                  <th style="text-align:right">实收保费(万)</th>
+                  <th style="text-align:right">差额(万)</th>
+                  <th style="text-align:center">续签率</th>
+                  <th>续签状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="detailTableBody">
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="policyModal" onclick="if(event.target===this)closePolicyModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="policyModalTitle">到期团单</h3>
+        <button class="modal-close" onclick="closePolicyModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="policyModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="export-btn" onclick="downloadPolicies()">
+          <span>📥</span> 下载
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    var mockData = [];
+    var currentPage = 1;
+    var pageSize = 10;
+
+    function getMonthsBefore(endDate, count) {
+      var parts = endDate.split('-');
+      var year = parseInt(parts[0]);
+      var month = parseInt(parts[1]);
+      var months = [];
+      for (var i = 0; i < count; i++) {
+        var m = month - i;
+        var y = year;
+        while (m <= 0) {
+          m += 12;
+          y--;
+        }
+        months.unshift(y + '-' + String(m).padStart(2, '0'));
+      }
+      return months;
+    }
+
+    function generateMockData() {
+      var endDate = document.getElementById('endDate').value;
+      if (!endDate) return [];
+
+      var months = getMonthsBefore(endDate, 12);
+      var customerServices = ['张伟', '李娜', '王芳', '刘洋', '陈静', '赵强', '孙丽', '周杰', '吴敏', '郑涛'];
+      var customers = ['北京科技有限公司', '上海贸易集团', '广州制造企业', '深圳创新科技', '杭州互联网公司', '成都物流集团', '武汉建筑工程', '南京金融服务', '西安能源集团', '重庆汽车制造', '天津医药集团', '长沙电子设备', '青岛海洋科技', '大连石化集团', '厦门软件公司'];
+      var insuranceTypes = ['雇主', '补充'];
+
+      var data = [];
+      var idx = 0;
+      months.forEach(function(monthStr, mIdx) {
+        var count = 3 + Math.floor(Math.random() * 4);
+        for (var j = 0; j < count; j++) {
+          var receivable = (100 + Math.random() * 200).toFixed(1);
+          var actual = (receivable * (0.72 + Math.random() * 0.23)).toFixed(1);
+          var diff = (receivable - actual).toFixed(1);
+          var rate = parseFloat((actual / receivable * 100).toFixed(1));
+          var status = rate >= 85 ? 'success' : rate >= 75 ? 'warning' : 'danger';
+
+          data.push({
+            month: monthStr,
+            policyNo: 'P' + (20250000 + idx),
+            customerName: customers[idx % customers.length],
+            insuranceType: insuranceTypes[idx % insuranceTypes.length],
+            customerService: customerServices[idx % customerServices.length],
+            receivable: parseFloat(receivable).toLocaleString(),
+            actual: parseFloat(actual).toLocaleString(),
+            diff: parseFloat(diff).toLocaleString(),
+            renewalRate: rate + '%',
+            renewalStatus: status
+          });
+          idx++;
+        }
+      });
+      return data;
+    }
+
+    function getStatusText(status) {
+      var map = {
+        'success': '<span class="status-tag success">正常</span>',
+        'warning': '<span class="status-tag warning">预警</span>',
+        'danger': '<span class="status-tag danger">异常</span>'
+      };
+      return map[status] || status;
+    }
+
+    function renderTable() {
+      var filteredData = filterData(mockData);
+      var total = filteredData.length;
+      var totalPages = Math.ceil(total / pageSize);
+      var start = (currentPage - 1) * pageSize;
+      var end = start + pageSize;
+      var pageData = filteredData.slice(start, end);
+
+      var tbody = document.getElementById('detailTableBody');
+      var html = '';
+
+      if (pageData.length === 0) {
+        html = '<tr><td colspan="9" class="text-center" style="padding:40px;color:#999">暂无数据</td></tr>';
+      } else {
+        pageData.forEach(function(item) {
+          html += '<tr>';
+          html += '<td>' + item.month + '</td>';
+          html += '<td>' + item.insuranceType + '</td>';
+          html += '<td>' + item.customerService + '</td>';
+          html += '<td class="text-right">' + item.receivable + '</td>';
+          html += '<td class="text-right">' + item.actual + '</td>';
+          html += '<td class="text-right">' + item.diff + '</td>';
+          html += '<td class="text-center">' + item.renewalRate + '</td>';
+          html += '<td>' + getStatusText(item.renewalStatus) + '</td>';
+          html += '<td><a href="#" onclick="viewExpiringPolicy(\'' + item.month + '\');return false;">查看到期团单</a></td>';
+          html += '</tr>';
+        });
+      }
+
+      tbody.innerHTML = html;
+      document.getElementById('totalCount').textContent = total;
+      renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+      if (totalPages === 0) {
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+      var container = document.getElementById('pagination');
+      var html = '<span class="page-info">第 ' + currentPage + ' / ' + totalPages + ' 页</span>';
+      html += '<button onclick="goToPage(1)" ' + (currentPage === 1 ? 'disabled' : '') + '>首页</button>';
+      html += '<button onclick="goToPage(' + (currentPage - 1) + ')" ' + (currentPage === 1 ? 'disabled' : '') + '>上一页</button>';
+
+      var startPage = Math.max(1, currentPage - 2);
+      var endPage = Math.min(totalPages, startPage + 4);
+      if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+
+      for (var i = startPage; i <= endPage; i++) {
+        html += '<button class="' + (i === currentPage ? 'active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+      }
+
+      html += '<button onclick="goToPage(' + (currentPage + 1) + ')" ' + (currentPage === totalPages ? 'disabled' : '') + '>下一页</button>';
+      html += '<button onclick="goToPage(' + totalPages + ')" ' + (currentPage === totalPages ? 'disabled' : '') + '>末页</button>';
+      container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      var filteredData = filterData(mockData);
+      var totalPages = Math.ceil(filteredData.length / pageSize);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderTable();
+    }
+
+    function filterData(data) {
+      var endDate = document.getElementById('endDate').value;
+      var insuranceType = document.getElementById('insuranceType').value;
+      var customerService = document.getElementById('customerService').value.trim();
+      var renewalStatus = document.getElementById('renewalStatus').value;
+
+      return data.filter(function(item) {
+        if (insuranceType && item.insuranceType !== insuranceType) return false;
+        if (customerService && item.customerService.indexOf(customerService) === -1) return false;
+        if (renewalStatus && item.renewalStatus !== renewalStatus) return false;
+        return true;
+      });
+    }
+
+    function searchData() {
+      mockData = generateMockData();
+      currentPage = 1;
+      renderTable();
+    }
+
+    function viewExpiringPolicy(month) {
+      var policies = [];
+      var groupNos = ['GD202607001', 'GD202607002', 'GD202606001', 'GD202606002', 'GD202605001', 'GD202605002', 'GD202604001', 'GD202603001'];
+      var payers = ['北京科技有限公司', '上海贸易集团', '广州制造企业', '深圳创新科技', '杭州互联网公司', '成都物流集团', '武汉建筑工程', '南京金融服务'];
+      var count = 3 + Math.floor(Math.random() * 5);
+      for (var i = 0; i < count; i++) {
+        policies.push({
+          groupNo: groupNos[i % groupNos.length],
+          payerName: payers[i % payers.length],
+          endDate: month + '-28',
+          totalPremium: (Math.floor(Math.random() * 50000) + 5000).toLocaleString()
+        });
+      }
+      var html = '<table class="data-table"><thead><tr><th>团单号码</th><th>付款方名称</th><th>团单止期</th><th style="text-align:right">总保费收入(元)</th></tr></thead><tbody>';
+      policies.forEach(function(p) {
+        html += '<tr><td>' + p.groupNo + '</td><td>' + p.payerName + '</td><td>' + p.endDate + '</td><td class="text-right">' + p.totalPremium + '</td></tr>';
+      });
+      html += '</tbody></table>';
+      document.getElementById('policyModalBody').innerHTML = html;
+      document.getElementById('policyModalTitle').textContent = month + ' 到期团单';
+      document.getElementById('policyModal').style.display = 'flex';
+      window._currentPolicies = policies;
+      window._currentMonth = month;
+    }
+
+    function closePolicyModal() {
+      document.getElementById('policyModal').style.display = 'none';
+    }
+
+    function downloadPolicies() {
+      var policies = window._currentPolicies || [];
+      if (policies.length === 0) return;
+      var headers = ['团单号码', '付款方名称', '团单止期', '总保费收入(元)'];
+      var rows = [headers.join(',')];
+      policies.forEach(function(p) {
+        rows.push([p.groupNo, '"' + p.payerName + '"', p.endDate, p.totalPremium].join(','));
+      });
+      var csvContent = '\uFEFF' + rows.join('\n');
+      var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '到期团单_' + (window._currentMonth || '') + '.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportData() {
+      var filteredData = filterData(mockData);
+      if (filteredData.length === 0) {
+        alert('暂无数据可导出');
+        return;
+      }
+
+      var headers = ['到期月份', '保险类别', '所属客服', '应收保费 (万)', '实收保费 (万)', '差额 (万)', '续签率', '续签状态'];
+      var rows = [headers.join(',')];
+
+      filteredData.forEach(function(item) {
+        var statusText = item.renewalStatus === 'success' ? '正常' : item.renewalStatus === 'warning' ? '预警' : '异常';
+        var row = [
+          item.month,
+          item.insuranceType,
+          item.customerService,
+          item.receivable,
+          item.actual,
+          item.diff,
+          item.renewalRate,
+          statusText
+        ];
+        rows.push(row.join(','));
+      });
+
+      var csvContent = '\uFEFF' + rows.join('\n');
+      var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      var url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', '续签明细_' + new Date().toISOString().slice(0, 10) + '.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function resetForm() {
+      var today = new Date();
+      var year = today.getFullYear();
+      var month = String(today.getMonth() + 1).padStart(2, '0');
+      document.getElementById('endDate').value = year + '-' + month;
+      document.getElementById('insuranceType').selectedIndex = 0;
+      document.getElementById('customerService').value = '';
+      document.getElementById('renewalStatus').selectedIndex = 0;
+      mockData = generateMockData();
+      currentPage = 1;
+      renderTable();
+    }
+
+    window.addEventListener('load', function() {
+      var today = new Date();
+      var year = today.getFullYear();
+      var month = String(today.getMonth() + 1).padStart(2, '0');
+      document.getElementById('endDate').value = year + '-' + month;
+      mockData = generateMockData();
+      renderTable();
+    });
+  </script>
+</body>
+</html>
