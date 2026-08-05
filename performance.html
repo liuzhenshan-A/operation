@@ -81,6 +81,13 @@
     .change-negative {
       color: #f5222d;
     }
+    .detail-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 20px 0 12px;
+      padding-left: 10px;
+      border-left: 3px solid #1890ff;
+    }
   </style>
 </head>
 <body>
@@ -103,7 +110,7 @@
             <div class="form-item">
               <label>年月</label>
               <input type="month" id="yearMonth" value="">
-              <span class="help-icon" data-title="选择数据统计年月，默认为当前月份">?</span>
+              <span class="help-icon" data-title="选择数据统计年月">?</span>
             </div>
             <div class="form-item">
               <label>保险类别</label>
@@ -122,30 +129,31 @@
         <div class="card">
           <div class="card-title">业绩概览</div>
           <div class="tab-header">
-            <div class="tab-item active" onclick="switchTab(this, 'current')">当前业务</div>
-            <div class="tab-item" onclick="switchTab(this, 'increment')">增量业务</div>
+            <div class="tab-item active" onclick="switchTab(this, 'new')">新增业务</div>
+            <div class="tab-item" onclick="switchTab(this, 'stock')">存量业务</div>
+            <div class="tab-item" onclick="switchTab(this, 'total')">合计</div>
           </div>
           <div class="kpi-row">
             <div class="kpi-box">
               <div class="kpi-label">
-                当月保费
-                <span class="help-icon" data-title="当月新签的全部保费金额（含首年保费）">?</span>
+                当月指标
+                <span class="help-icon" data-title="系统录入的当月需要完成的指标数据">?</span>
               </div>
-              <div class="kpi-value">¥680万</div>
+              <div class="kpi-value" id="kpiMonthlyPremium">¥680万</div>
             </div>
             <div class="kpi-box">
               <div class="kpi-label">
                 当月完成
-                <span class="help-icon" data-title="当月实际完成的业绩金额（含核保通过）">?</span>
+                <span class="help-icon" data-title="当月实际完成的业绩金额（已出账单）">?</span>
               </div>
-              <div class="kpi-value">¥612万</div>
+              <div class="kpi-value" id="kpiMonthlyDone">¥612万</div>
             </div>
             <div class="kpi-box highlight">
               <div class="kpi-label">
                 当月达成率
                 <span class="help-icon" data-title="当月完成 / 当月保费 × 100%">?</span>
               </div>
-              <div class="kpi-value">90.0%</div>
+              <div class="kpi-value" id="kpiMonthlyRate">90.0%</div>
             </div>
           </div>
           <div class="kpi-row">
@@ -154,28 +162,28 @@
                 累计指标
                 <span class="help-icon" data-title="年初至当月的业绩目标总额">?</span>
               </div>
-              <div class="kpi-value">¥4,080万</div>
+              <div class="kpi-value" id="kpiCumTarget">¥4,080万</div>
             </div>
             <div class="kpi-box">
               <div class="kpi-label">
                 累计达成
                 <span class="help-icon" data-title="年初至当月实际完成的业绩总额">?</span>
               </div>
-              <div class="kpi-value">¥3,825万</div>
+              <div class="kpi-value" id="kpiCumDone">¥3,825万</div>
             </div>
             <div class="kpi-box highlight">
               <div class="kpi-label">
                 累计达成率
                 <span class="help-icon" data-title="累计达成 / 累计指标 × 100%">?</span>
               </div>
-              <div class="kpi-value">93.8%</div>
+              <div class="kpi-value" id="kpiCumRate">93.8%</div>
             </div>
           </div>
         </div>
 
         <div class="chart-card">
           <div class="chart-title">
-            每月业绩达成 vs 达成（目标达成率 vs 达成率）
+            <span id="chartTitle">2026年每月业绩达成 vs 达成（目标达成率 vs 达成率）</span>
             <span class="help-icon" data-title="展示各月份的目标达成率和实际达成率对比">?</span>
           </div>
           <div class="chart-container" id="performanceChart"></div>
@@ -190,12 +198,13 @@
             <span class="help-icon" data-title="展示业绩达成的详细数据">?</span>
             <button type="button" class="search-btn" style="margin-left:auto;font-size:12px;padding:6px 16px" onclick="exportData()">导出CSV</button>
           </div>
+
+          <div class="detail-section-title">新增业务</div>
           <div style="overflow-x:auto">
-            <table class="data-table">
+            <table class="data-table" id="newBizTable">
               <thead>
                 <tr>
                   <th>月份</th>
-                  <th>业务类型</th>
                   <th>当月指标(万)</th>
                   <th>当月达成(万)</th>
                   <th>当月达成率</th>
@@ -203,59 +212,28 @@
                   <th>累计达成(万)</th>
                   <th>累计达成率</th>
                   <th>环比增长</th>
-                  <th>操作</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="newBizBody"></tbody>
+            </table>
+          </div>
+
+          <div class="detail-section-title">存量业务</div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="stockBizTable">
+              <thead>
                 <tr>
-                  <td>2024-06</td>
-                  <td>当前业务</td>
-                  <td>680</td>
-                  <td>612</td>
-                  <td>90.0%</td>
-                  <td>4,080</td>
-                  <td>3,825</td>
-                  <td>93.8%</td>
-                  <td class="change-positive">+5.2%</td>
-                  <td><a href="#" onclick="viewDetail(event)">查看明细</a></td>
+                  <th>月份</th>
+                  <th>当月指标(万)</th>
+                  <th>当月达成(万)</th>
+                  <th>当月达成率</th>
+                  <th>累计指标(万)</th>
+                  <th>累计达成(万)</th>
+                  <th>累计达成率</th>
+                  <th>环比增长</th>
                 </tr>
-                <tr>
-                  <td>2024-06</td>
-                  <td>增量业务</td>
-                  <td>2,100</td>
-                  <td>1,865</td>
-                  <td>88.8%</td>
-                  <td>12,600</td>
-                  <td>10,815</td>
-                  <td>85.8%</td>
-                  <td class="change-positive">+3.8%</td>
-                  <td><a href="#" onclick="viewDetail(event)">查看明细</a></td>
-                </tr>
-                <tr>
-                  <td>2024-05</td>
-                  <td>当前业务</td>
-                  <td>650</td>
-                  <td>598</td>
-                  <td>92.0%</td>
-                  <td>3,400</td>
-                  <td>3,213</td>
-                  <td>94.5%</td>
-                  <td class="change-positive">+2.1%</td>
-                  <td><a href="#" onclick="viewDetail(event)">查看明细</a></td>
-                </tr>
-                <tr>
-                  <td>2024-05</td>
-                  <td>增量业务</td>
-                  <td>2,000</td>
-                  <td>1,780</td>
-                  <td>89.0%</td>
-                  <td>10,500</td>
-                  <td>8,950</td>
-                  <td>85.2%</td>
-                  <td class="change-negative">-1.5%</td>
-                  <td><a href="#" onclick="viewDetail(event)">查看明细</a></td>
-                </tr>
-              </tbody>
+              </thead>
+              <tbody id="stockBizBody"></tbody>
             </table>
           </div>
         </div>
@@ -264,18 +242,53 @@
   </div>
   <script src="js/common.js"></script>
   <script>
+    var currentTab = 'new';
+    var chartInstance = null;
+
+    var kpiData = {
+      '2026': {
+        'new': { monthly: [680,650,700,720,750,780,800,820,850,880,900,920], done: [612,598,630,648,675,702,720,738,765,792,810,828] },
+        'stock': { monthly: [2100,2000,2150,2200,2300,2400,2500,2600,2700,2800,2900,3000], done: [1865,1780,1935,1980,2070,2160,2250,2340,2430,2520,2610,2700] }
+      },
+      '2025': {
+        'new': { monthly: [600,580,620,640,670,700,720,740,770,800,820,840], done: [540,522,558,576,603,630,648,666,693,720,738,756] },
+        'stock': { monthly: [1900,1850,1950,2000,2100,2200,2300,2400,2500,2600,2700,2800], done: [1710,1665,1755,1800,1890,1980,2070,2160,2250,2340,2430,2520] }
+      },
+      '2024': {
+        'new': { monthly: [550,530,570,590,620,650,670,690,720,750,770,790], done: [495,477,513,531,558,585,603,621,648,675,693,711] },
+        'stock': { monthly: [1700,1650,1750,1800,1900,2000,2100,2200,2300,2400,2500,2600], done: [1530,1485,1575,1620,1710,1800,1890,1980,2070,2160,2250,2340] }
+      }
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
       var today = new Date();
       var year = today.getFullYear();
       var month = String(today.getMonth() + 1).padStart(2, '0');
       document.getElementById('yearMonth').value = year + '-' + month;
       initChart();
+      renderTables();
+      updateKPIs();
     });
 
+    function getSelectedYear() {
+      var ym = document.getElementById('yearMonth').value;
+      return ym ? ym.split('-')[0] : String(new Date().getFullYear());
+    }
+
+    function getYearMonths(year) {
+      var months = [];
+      for (var m = 1; m <= 12; m++) {
+        months.push(year + '-' + String(m).padStart(2, '0'));
+      }
+      return months;
+    }
+
     function search() {
-      var yearMonth = document.getElementById('yearMonth').value;
-      var insuranceType = document.getElementById('insuranceType').value;
-      console.log('查询条件:', { yearMonth, insuranceType });
+      var year = getSelectedYear();
+      updateChartTitle(year);
+      initChart();
+      renderTables();
+      updateKPIs();
     }
 
     function resetForm() {
@@ -284,6 +297,14 @@
       var month = String(today.getMonth() + 1).padStart(2, '0');
       document.getElementById('yearMonth').value = year + '-' + month;
       document.getElementById('insuranceType').value = '';
+      updateChartTitle(String(year));
+      initChart();
+      renderTables();
+      updateKPIs();
+    }
+
+    function updateChartTitle(year) {
+      document.getElementById('chartTitle').textContent = year + '年每月业绩达成 vs 达成（目标达成率 vs 达成率）';
     }
 
     function switchTab(el, tab) {
@@ -291,26 +312,151 @@
         item.classList.remove('active');
       });
       el.classList.add('active');
-      console.log('切换到:', tab);
+      currentTab = tab;
+      renderTables();
+      updateKPIs();
     }
 
-    function viewDetail(e) {
-      e.preventDefault();
-      console.log('查看明细');
+    function updateKPIs() {
+      var year = getSelectedYear();
+      var today = new Date();
+      var curMonth = Math.min(today.getMonth() + 1, 12);
+      var idx = curMonth - 1;
+      var monthlyPremium = 0, monthlyDone = 0, cumTarget = 0, cumDone = 0;
+      if (currentTab === 'total') {
+        ['new', 'stock'].forEach(function(type) {
+          var data = kpiData[year][type];
+          monthlyPremium += data.monthly[idx];
+          monthlyDone += data.done[idx];
+          for (var i = 0; i <= idx; i++) {
+            cumTarget += data.monthly[i];
+            cumDone += data.done[i];
+          }
+        });
+      } else {
+        var data = kpiData[year][currentTab];
+        monthlyPremium = data.monthly[idx];
+        monthlyDone = data.done[idx];
+        for (var i = 0; i <= idx; i++) {
+          cumTarget += data.monthly[i];
+          cumDone += data.done[i];
+        }
+      }
+      var monthlyRate = (monthlyDone / monthlyPremium * 100).toFixed(1);
+      var cumRate = (cumDone / cumTarget * 100).toFixed(1);
+      document.getElementById('kpiMonthlyPremium').textContent = '¥' + monthlyPremium + '万';
+      document.getElementById('kpiMonthlyDone').textContent = '¥' + monthlyDone + '万';
+      document.getElementById('kpiMonthlyRate').textContent = monthlyRate + '%';
+      document.getElementById('kpiCumTarget').textContent = '¥' + cumTarget.toLocaleString() + '万';
+      document.getElementById('kpiCumDone').textContent = '¥' + cumDone.toLocaleString() + '万';
+      document.getElementById('kpiCumRate').textContent = cumRate + '%';
+    }
+
+    function renderTables() {
+      var year = getSelectedYear();
+      var months = getYearMonths(year);
+      ['new', 'stock'].forEach(function(type) {
+        var data = kpiData[year][type];
+        var cumTarget = 0, cumDone = 0, prevDone = 0;
+        var html = '';
+        for (var i = 0; i < 12; i++) {
+          cumTarget += data.monthly[i];
+          cumDone += data.done[i];
+          var monthRate = (data.done[i] / data.monthly[i] * 100).toFixed(1);
+          var cumRate = (cumDone / cumTarget * 100).toFixed(1);
+          var growth = i === 0 ? '-' : ((data.done[i] - prevDone) / prevDone * 100).toFixed(1);
+          var growthClass = growth === '-' ? '' : (parseFloat(growth) >= 0 ? 'change-positive' : 'change-negative');
+          var growthText = growth === '-' ? '-' : (parseFloat(growth) >= 0 ? '+' + growth + '%' : growth + '%');
+          html += '<tr>';
+          html += '<td>' + months[i] + '</td>';
+          html += '<td>' + data.monthly[i] + '</td>';
+          html += '<td>' + data.done[i] + '</td>';
+          html += '<td>' + monthRate + '%</td>';
+          html += '<td>' + cumTarget.toLocaleString() + '</td>';
+          html += '<td>' + cumDone.toLocaleString() + '</td>';
+          html += '<td>' + cumRate + '%</td>';
+          html += '<td class="' + growthClass + '">' + growthText + '</td>';
+          html += '</tr>';
+          prevDone = data.done[i];
+        }
+        if (type === 'new') {
+          document.getElementById('newBizBody').innerHTML = html;
+        } else {
+          document.getElementById('stockBizBody').innerHTML = html;
+        }
+      });
     }
 
     function exportData() {
-      console.log('导出CSV');
+      var year = getSelectedYear();
+      var months = getYearMonths(year);
+      var headers = ['月份', '当月指标(万)', '当月达成(万)', '当月达成率', '累计指标(万)', '累计达成(万)', '累计达成率', '环比增长'];
+      var rows = [headers.join(',')];
+      if (currentTab === 'total') {
+        var newD = kpiData[year]['new'], stockD = kpiData[year]['stock'];
+        var cumTarget = 0, cumDone = 0, prevDone = 0;
+        for (var i = 0; i < 12; i++) {
+          var totalMonthly = newD.monthly[i] + stockD.monthly[i];
+          var totalDone = newD.done[i] + stockD.done[i];
+          cumTarget += totalMonthly;
+          cumDone += totalDone;
+          var monthRate = (totalDone / totalMonthly * 100).toFixed(1) + '%';
+          var cumRate = (cumDone / cumTarget * 100).toFixed(1) + '%';
+          var growth = i === 0 ? '-' : ((totalDone - prevDone) / prevDone * 100).toFixed(1) + '%';
+          rows.push([months[i], totalMonthly, totalDone, monthRate, cumTarget, cumDone, cumRate, growth].join(','));
+          prevDone = totalDone;
+        }
+      } else {
+        var data = kpiData[year][currentTab];
+        var cumTarget = 0, cumDone = 0, prevDone = 0;
+        for (var i = 0; i < 12; i++) {
+          cumTarget += data.monthly[i];
+          cumDone += data.done[i];
+          var monthRate = (data.done[i] / data.monthly[i] * 100).toFixed(1) + '%';
+          var cumRate = (cumDone / cumTarget * 100).toFixed(1) + '%';
+          var growth = i === 0 ? '-' : ((data.done[i] - prevDone) / prevDone * 100).toFixed(1) + '%';
+          rows.push([months[i], data.monthly[i], data.done[i], monthRate, cumTarget, cumDone, cumRate, growth].join(','));
+          prevDone = data.done[i];
+        }
+      }
+      var csvContent = '\uFEFF' + rows.join('\n');
+      var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '业绩明细_' + year + '.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function initChart() {
-      var chart = echarts.init(document.getElementById('performanceChart'));
-      chart.setOption({
+      var year = getSelectedYear();
+      var months = getYearMonths(year);
+      var targetRates = [], actualRates = [];
+      if (currentTab === 'total') {
+        var newD = kpiData[year]['new'], stockD = kpiData[year]['stock'];
+        for (var i = 0; i < 12; i++) {
+          var totalMonthly = newD.monthly[i] + stockD.monthly[i];
+          var totalDone = newD.done[i] + stockD.done[i];
+          targetRates.push(100);
+          actualRates.push(parseFloat((totalDone / totalMonthly * 100).toFixed(1)));
+        }
+      } else {
+        var data = kpiData[year][currentTab];
+        for (var i = 0; i < 12; i++) {
+          targetRates.push(100);
+          actualRates.push(parseFloat((data.done[i] / data.monthly[i] * 100).toFixed(1)));
+        }
+      }
+      if (chartInstance) {
+        chartInstance.dispose();
+      }
+      chartInstance = echarts.init(document.getElementById('performanceChart'));
+      chartInstance.setOption({
         tooltip: {
           trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          },
+          axisPointer: { type: 'shadow' },
           formatter: function(params) {
             var result = params[0].axisValueLabel + '<br/>';
             params.forEach(function(item) {
@@ -323,69 +469,40 @@
           data: ['目标达成率', '达成率'],
           bottom: 0
         },
-        grid: {
-          top: 20,
-          right: 20,
-          bottom: 50,
-          left: 50
-        },
+        grid: { top: 20, right: 20, bottom: 50, left: 50 },
         xAxis: {
           type: 'category',
-          data: ['8月', '9月', '10月', '11月', '12月', '1月', '2月', '3月', '4月', '5月', '6月', '7月'],
-          axisLine: {
-            lineStyle: { color: '#e8e8e8' }
-          },
-          axisLabel: {
-            color: '#999',
-            fontSize: 12
-          }
+          data: months,
+          axisLine: { lineStyle: { color: '#e8e8e8' } },
+          axisLabel: { color: '#999', fontSize: 12 }
         },
         yAxis: {
           type: 'value',
           name: '%',
-          nameTextStyle: {
-            color: '#999',
-            fontSize: 12,
-            padding: [0, 30, 0, 0]
-          },
-          axisLine: {
-            show: false
-          },
-          axisLabel: {
-            color: '#999',
-            fontSize: 12,
-            formatter: '{value}%'
-          },
-          splitLine: {
-            lineStyle: {
-              color: '#f0f0f0'
-            }
-          }
+          nameTextStyle: { color: '#999', fontSize: 12, padding: [0, 30, 0, 0] },
+          axisLine: { show: false },
+          axisLabel: { color: '#999', fontSize: 12, formatter: '{value}%' },
+          splitLine: { lineStyle: { color: '#f0f0f0' } }
         },
         series: [
           {
             name: '目标达成率',
             type: 'bar',
-            data: [65, 68, 70, 72, 75, 78, 80, 82, 85, 88, 90, 92],
-            itemStyle: {
-              color: '#e8e8e8'
-            },
+            data: targetRates,
+            itemStyle: { color: '#e8e8e8' },
             barWidth: '35%'
           },
           {
             name: '达成率',
             type: 'bar',
-            data: [55, 58, 62, 65, 68, 72, 75, 78, 80, 85, 88, 90],
-            itemStyle: {
-              color: '#52c41a'
-            },
+            data: actualRates,
+            itemStyle: { color: '#52c41a' },
             barWidth: '35%'
           }
         ]
       });
-
       window.addEventListener('resize', function() {
-        chart.resize();
+        chartInstance.resize();
       });
     }
   </script>

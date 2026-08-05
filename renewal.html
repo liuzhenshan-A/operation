@@ -126,42 +126,42 @@
         <div class="grid-4" style="gap:16px">
           <div class="kpi-card">
             <div class="kpi-label">
-              当前应收保费
+              应续保费
               <span class="help-icon" data-title="应续保费 = 查询截止年月到期团单的实际收入保费">?</span>
             </div>
             <div class="kpi-value">¥1,850.6万</div>
-            <div class="kpi-change">+1.2% 同比</div>
+            <div class="kpi-change">同期 ¥1,828.6万 · +1.2%</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">
-              当前实收保费
-              <span class="help-icon" data-title="实收保费 = 查询截止年月实际已收到的续期保费">?</span>
+              实续保费
+              <span class="help-icon" data-title="实收保费 = 年缴 （实际经过月份保费总额），月（经过月份总保费+最后一个账单月总保费*剩余月份）、季（首期保费/3*团单总月份）、半年（首期保费/6*团单总月份）">?</span>
             </div>
             <div class="kpi-value">¥1,621.8万</div>
-            <div class="kpi-change">+1.5% 同比</div>
+            <div class="kpi-change">同期 ¥1,597.8万 · +1.5%</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">
               续签率
-              <span class="help-icon" data-title="实收保费 / 应收保费 × 100%">?</span>
+              <span class="help-icon" data-title="应续保费 / 实续保费 × 100%">?</span>
             </div>
             <div class="kpi-value">87.6%</div>
-            <div class="kpi-change">+1.5% 同比</div>
+            <div class="kpi-change">同期 86.1% · +1.5pp</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">
               未续签金额
-              <span class="help-icon" data-title="应收保费 - 实收保费，即尚未收到的保费">?</span>
+              <span class="help-icon" data-title="应续保费 - 实续保费，即尚未收到的保费">?</span>
             </div>
             <div class="kpi-value">¥228.8万</div>
-            <div class="kpi-change negative">+2.3% 同比</div>
+            <div class="kpi-change negative">同期 ¥223.7万 · +2.3%</div>
           </div>
         </div>
 
         <div class="chart-card">
           <div class="chart-title">
-            <span id="chartTitle"></span>12月续签保费对比（当前应收保费 vs 实收保费）</span>
-            <span class="help-icon" data-title="根据查询截止月份，展示近12个月份的应收保费和实收保费对比">?</span>
+            <span id="chartTitle"></span>12月续签保费对比（应续保费 vs 实续保费）</span>
+            <span class="help-icon" data-title="根据查询截止月份，展示近12个月份的应续保费和实续保费对比">?</span>
           </div>
           <div class="chart-container" id="renewalChart"></div>
         </div>
@@ -321,7 +321,7 @@
           }
         },
         legend: {
-          data: ['当前应收保费', '实收保费'],
+          data: ['应续保费', '实续保费'],
           bottom: 0
         },
         grid: {
@@ -364,7 +364,7 @@
         },
         series: [
           {
-            name: '当前应收保费',
+            name: '应续保费',
             type: 'bar',
             data: months.map(function(m, i) { return (1200 + i * 50 + Math.random() * 100).toFixed(0); }),
             itemStyle: {
@@ -373,7 +373,7 @@
             barWidth: '35%'
           },
           {
-            name: '实收保费',
+            name: '实续保费',
             type: 'bar',
             data: months.map(function(m, i) { return (1050 + i * 50 + Math.random() * 80).toFixed(0); }),
             itemStyle: {

@@ -259,7 +259,10 @@ body {
   color: #fff;
   font-size: 12px;
   border-radius: 4px;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 320px;
+  width: max-content;
   z-index: 100;
 }
 

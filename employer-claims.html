@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雇主理赔 - 运营工作台</title>
+<link rel="stylesheet" href="css/common.css">
+<style>
+:root {
+  --c-bg:#f5f6fa;--c-surface:#fff;--c-text:#1a1d2e;--c-text2:#595f72;--c-text3:#949aad;
+  --c-border:#e8ebf3;--c-border-light:#f2f4f9;--c-row-hover:#f8f9fd;
+  --blue:#4f6ef7;--blue-bg:#eef1fe;--blue-dark:#3b54d4;
+  --red:#f25656;--red-bg:#fef1f1;--green:#2ec4a7;--green-bg:#edfaf7;
+  --orange:#f5a854;--orange-bg:#fef7ee;--purple:#7c5cfc;--purple-bg:#f2effe;
+  --radius:14px;--radius-sm:10px;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02);
+  --shadow-hover:0 4px 16px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.03);
+  --transition:0.22s cubic-bezier(.4,0,.2,1);
+}
+.page-body{padding:22px 28px;display:flex;flex-direction:column;gap:18px}
+.kpi-section{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi-card{background:#fff;border-radius:var(--radius);padding:20px 18px 16px;box-shadow:var(--shadow);transition:var(--transition);position:relative;overflow:hidden;border:1px solid transparent;animation:fadeUp .45s ease both}
+.kpi-card:nth-child(1){animation-delay:0s}.kpi-card:nth-child(2){animation-delay:.05s}.kpi-card:nth-child(3){animation-delay:.10s}.kpi-card:nth-child(4){animation-delay:.15s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:var(--c-border)}
+.kpi-card .kpi-icon-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.kpi-card .kpi-icon-dot{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.kpi-icon-dot.c1{background:#eef1fe;color:var(--blue)}.kpi-icon-dot.c2{background:#edfaf7;color:var(--green)}.kpi-icon-dot.c3{background:#fef7ee;color:var(--orange)}.kpi-icon-dot.c4{background:#fef1f1;color:var(--red)}
+.kpi-card .kpi-title{font-size:12px;color:var(--c-text3);font-weight:550;letter-spacing:.1px}
+.kpi-card .kpi-value-row{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.kpi-card .kpi-current{font-size:30px;font-weight:750;color:var(--c-text);letter-spacing:-.8px;line-height:1}
+.kpi-card .kpi-unit{font-size:13px;color:var(--c-text3);font-weight:500}
+.kpi-card .kpi-meta{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid var(--c-border-light)}
+.kpi-card .kpi-sync-label{font-size:11px;color:var(--c-text3)}
+.kpi-card .kpi-sync-value{font-size:13px;color:var(--c-text2);font-weight:600}
+.kpi-card .kpi-delta{font-weight:650;padding:3px 10px;border-radius:20px;font-size:12px;margin-left:auto}
+.kpi-delta.up{background:var(--red-bg);color:var(--red)}.kpi-delta.down{background:var(--green-bg);color:var(--green)}.kpi-delta.warn{background:var(--orange-bg);color:var(--orange)}
+.info-tip{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#e8ebf3;color:#949aad;font-size:10px;font-weight:700;cursor:help;flex-shrink:0;transition:all .15s;line-height:1;vertical-align:middle;margin-left:5px}
+.info-tip:hover{background:var(--blue);color:#fff}
+.tooltip-popup{position:fixed;z-index:9999;pointer-events:none;background:#2a2f45;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;line-height:1.75;max-width:380px;min-width:220px;white-space:normal;word-wrap:break-word;box-shadow:0 10px 32px rgba(0,0,0,.22);opacity:0;transform:translate(-50%,-100%) translateY(6px);transition:opacity .18s,transform .18s}
+.tooltip-popup.show{opacity:1;transform:translate(-50%,-100%) translateY(0)}
+.tooltip-popup .tip-rules{color:#b9bfd4;font-size:12px;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.12)}
+.table-section{margin-top:0}
+.table-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid transparent;transition:var(--transition)}
+.table-card:hover{border-color:var(--c-border)}
+.table-header-bar{padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--c-border-light)}
+.table-title{font-size:14px;font-weight:650;letter-spacing:-.2px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#f9fafc;padding:11px 14px;text-align:left;font-weight:600;color:var(--c-text2);border-bottom:2px solid var(--c-border);white-space:nowrap;position:sticky;top:0;font-size:12px;letter-spacing:.1px}
+thead th.num{text-align:right}
+tbody td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--c-border-light);white-space:nowrap;font-variant-numeric:tabular-nums}
+tbody td.num{text-align:right}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--c-row-hover)}
+tbody tr.group-row td{font-weight:650;color:var(--c-text);border-bottom:1px solid var(--c-border);background:#fafbfd;font-size:13px}
+.amount-high{color:var(--red);font-weight:650}
+@media(max-width:1400px){.kpi-section{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.kpi-section{grid-template-columns:1fr}.search-form{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon">📋</div>
+      <h1>运营工作台</h1>
+    </div>
+    <nav id="sidebar-menu"></nav>
+  </aside>
+  <div class="main-content">
+    <div class="page-header">
+      <h2 id="page-title">雇主理赔</h2>
+    </div>
+    <div class="page-body">
+      <div class="card">
+        <div class="card-title">查询条件</div>
+        <form class="search-form">
+          <div class="form-item">
+            <label>合同方</label>
+            <input type="text" id="filterContractParty" placeholder="请输入合同方">
+            <span class="help-icon" data-title="输入合同方进行模糊查询">?</span>
+          </div>
+          <div class="form-item">
+            <label>付款方</label>
+            <input type="text" id="filterPayer" placeholder="请输入付款方">
+            <span class="help-icon" data-title="输入付款方进行模糊查询">?</span>
+          </div>
+          <div class="form-item">
+            <label>所属保司</label>
+            <select id="filterCompany">
+              <option value="" selected>全部保司</option>
+              <option value="中国人寿">中国人寿</option>
+              <option value="平安保险">平安保险</option>
+              <option value="太平洋保险">太平洋保险</option>
+            </select>
+            <span class="help-icon" data-title="按保险公司筛选理赔数据">?</span>
+          </div>
+          <div class="form-item">
+            <label>所属客服</label>
+            <input type="text" id="filterService" placeholder="请输入所属客服">
+            <span class="help-icon" data-title="输入所属客服进行精准查询">?</span>
+          </div>
+          <div class="form-item">
+            <label>当前年度</label>
+            <select id="filterYear">
+              <option value="2024" selected>2025年</option>
+              <option value="2025">2026年</option>
+            </select>
+            <span class="help-icon" data-title="选择当前统计年度">?</span>
+          </div>
+          <div class="form-item">
+            <label>截止月份</label>
+            <select id="filterMonth">
+              <option value="">全年</option>
+              <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+              <option value="4">4月</option><option value="5">5月</option><option value="6" selected>6月</option>
+              <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+              <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+            </select>
+            <span class="help-icon" data-title="选择数据统计截止月份">?</span>
+          </div>
+          <div class="form-item">
+            <label>同期对比</label>
+            <select id="filterCompareYear">
+              <option value="2023" selected>2025年</option>
+              <option value="2024">2024年</option>
+            </select>
+            <span class="help-icon" data-title="选择同期对比年度">?</span>
+          </div>
+          <button type="button" class="search-btn" onclick="refreshData()">查询</button>
+          <button type="button" class="search-btn" style="background:#d9d9d9" onclick="resetFilters()">重置</button>
+        </form>
+      </div>
+      <div class="data-note" style="font-size:13px;color:#f5a854;padding:8px 16px;background:#fef7ee;border-radius:8px;border-left:3px solid #f5a854;margin-top:-20px;">
+        <strong>说明：</strong>以下数据，仅统计雇主责任险险种数据
+      </div>
+      <div class="kpi-section" id="kpiCards"></div>
+      <div class="table-section">
+        <div class="table-card">
+          <div class="table-header-bar">
+            <div class="table-title">赔付较高客户名单<span class="info-tip" data-tip="展示赔付金额较高的客户清单，用于重点关注和风险管理。" data-rules="按赔款金额降序排列，展示合同方、付款方、团单号、出险人数及赔款金额。">?</span></div>
+          </div>
+          <div class="table-wrap" id="highClaimTable"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function generateKPI(){
+  return {
+    premium:{
+      name:'应支保费',
+      tip:'保单年度内应收保费总额，反映业务规模。',
+      rules:'同期口径：对应历史保单年度同期保费。',
+      unit:'万元',
+      icon:'💰',
+      cls:'c1',
+      cur:3280,
+      sync:2950,
+      delta:330,
+      pct:11.19
+    },
+    available:{
+      name:'可用赔款',
+      tip:'可用于理赔支出的总预算额度。',
+      rules:'可用赔款 = 应支保费（不含税）。',
+      unit:'万元',
+      icon:'📋',
+      cls:'c2',
+      cur:328,
+      sync:295,
+      delta:33,
+      pct:11.19
+    },
+    used:{
+      name:'已用赔款',
+      tip:'已实际支出的理赔金额。',
+      rules:'口径：以初审通过的为计算依据。',
+      unit:'万元',
+      icon:'📊',
+      cls:'c3',
+      cur:268,
+      sync:225,
+      delta:43,
+      pct:19.11
+    },
+    claimRate:{
+      name:'理赔率',
+      tip:'已用赔款 ÷ 可用赔款 × 100%。',
+      rules:'预警规则：>85% 触发高危，>75% 关注。',
+      unit:'%',
+      icon:'📈',
+      cls:'c4',
+      cur:81.71,
+      sync:76.27,
+      delta:5.44,
+      pct:7.13
+    }
+  };
+}
+
+function generateHighClaimCustomers(){
+  return [
+    {contract:'杭州阿里巴巴科技有限公司',payer:'杭州阿里巴巴科技有限公司',policyNo:'EMP-2025-001',claimCount:28,claimAmount:45.80},
+    {contract:'腾讯科技（深圳）有限公司',payer:'腾讯科技（深圳）有限公司',policyNo:'EMP-2025-002',claimCount:22,claimAmount:38.50},
+    {contract:'字节跳动有限公司',payer:'字节跳动有限公司',policyNo:'EMP-2025-003',claimCount:19,claimAmount:32.60},
+    {contract:'美团科技有限公司',payer:'美团科技有限公司',policyNo:'EMP-2025-004',claimCount:16,claimAmount:28.40},
+    {contract:'京东集团股份有限公司',payer:'京东集团股份有限公司',policyNo:'EMP-2025-005',claimCount:14,claimAmount:24.20},
+    {contract:'网易（杭州）网络有限公司',payer:'网易（杭州）网络有限公司',policyNo:'EMP-2025-006',claimCount:12,claimAmount:21.80},
+    {contract:'小米科技有限公司',payer:'小米科技有限公司',policyNo:'EMP-2025-007',claimCount:11,claimAmount:19.50},
+    {contract:'滴滴出行科技有限公司',payer:'滴滴出行科技有限公司',policyNo:'EMP-2025-008',claimCount:10,claimAmount:17.20},
+    {contract:'拼多多网络科技有限公司',payer:'拼多多网络科技有限公司',policyNo:'EMP-2025-009',claimCount:9,claimAmount:15.60},
+    {contract:'快手科技有限公司',payer:'快手科技有限公司',policyNo:'EMP-2025-010',claimCount:8,claimAmount:13.80}
+  ];
+}
+
+function renderKPIs(kpi){
+  const keys=['premium','available','used','claimRate'];
+  document.getElementById('kpiCards').innerHTML=keys.map(k=>{
+    const d=kpi[k],isRate=k==='claimRate';
+    const cls=d.delta>0?'up':(d.delta<0?'down':'warn');
+    const sym=d.delta>0?'↑':(d.delta<0?'↓':'→');
+    const deltaStr=isRate?`${sym} ${d.delta.toFixed(2)}pp`:`${sym} ${Math.abs(d.delta)}${d.unit}`;
+    return `<div class="kpi-card">
+      <div class="kpi-icon-row">
+        <div class="kpi-icon-dot ${d.cls}">${d.icon}</div>
+        <div class="kpi-title">${d.name}<span class="info-tip" data-tip="${d.tip}" data-rules="${d.rules}">?</span></div>
+      </div>
+      <div class="kpi-value-row">
+        <span class="kpi-current">${isRate?d.cur.toFixed(2)+'%':d.cur}</span>
+        <span class="kpi-unit">${d.unit}</span>
+      </div>
+      <div class="kpi-meta">
+        <span class="kpi-sync-label">同期</span>
+        <span class="kpi-sync-value">${isRate?d.sync.toFixed(2)+'%':d.sync+d.unit}</span>
+        <span class="kpi-delta ${cls}">${deltaStr}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHighClaimTable(){
+  const data=generateHighClaimCustomers();
+  const totalClaims=data.reduce((s,d)=>s+d.claimCount,0);
+  const totalAmount=data.reduce((s,d)=>s+d.claimAmount,0);
+  let h=`<table>
+    <thead>
+      <tr>
+        <th>合同方名称</th>
+        <th>付款方名称</th>
+        <th>团单号码</th>
+        <th class="num">出险人数</th>
+        <th class="num">赔款金额（万元）</th>
+      </tr>
+    </thead>
+    <tbody>`;
+  data.forEach(d=>{
+    h+=`<tr>
+      <td>${d.contract}</td>
+      <td>${d.payer}</td>
+      <td>${d.policyNo}</td>
+      <td class="num">${d.claimCount}</td>
+      <td class="num amount-high">${d.claimAmount.toFixed(2)}</td>
+    </tr>`;
+  });
+  h+=`<tr class="group-row" style="background:#f0f3ff">
+    <td><strong>合计</strong></td>
+    <td></td>
+    <td></td>
+    <td class="num"><strong>${totalClaims}</strong></td>
+    <td class="num amount-high"><strong>${totalAmount.toFixed(2)}</strong></td>
+  </tr>`;
+  h+='</tbody></table>';
+  document.getElementById('highClaimTable').innerHTML=h;
+}
+
+let tooltipEl=null,tipTimer=null,tipTarget=null;
+function ensureTipEl(){if(!tooltipEl){tooltipEl=document.createElement('div');tooltipEl.className='tooltip-popup';document.body.appendChild(tooltipEl)}}
+function showTip(el){ensureTipEl();clearTimeout(tipTimer);const t=el.dataset.tip,r=el.dataset.rules;tooltipEl.innerHTML=t+(r?`<div class="tip-rules">${r}</div>`:'');tooltipEl.classList.remove('show');const rect=el.getBoundingClientRect();const vw=window.innerWidth;let left=rect.left+rect.width/2;const minLeft=190,maxLeft=vw-190;if(left<minLeft)left=minLeft;if(left>maxLeft)left=maxLeft;tooltipEl.style.left=left+'px';tooltipEl.style.top=(rect.top-10)+'px';requestAnimationFrame(()=>tooltipEl.classList.add('show'))}
+function hideTip(){tipTimer=setTimeout(()=>{if(!document.querySelector('.info-tip:hover')){if(tooltipEl)tooltipEl.classList.remove('show')}},120)}
+document.addEventListener('mouseenter',e=>{const tip=e.target.closest('.info-tip');if(tip&&tip!==tipTarget){tipTarget=tip;showTip(tip)}},true);
+document.addEventListener('mouseleave',e=>{const tip=e.target.closest('.info-tip');if(tip){tipTarget=null;hideTip()}},true);
+
+function refreshData(){renderAll()}
+function resetFilters(){
+  document.getElementById('filterContractParty').value='';
+  document.getElementById('filterPayer').value='';
+  document.getElementById('filterCompany').value='';
+  document.getElementById('filterService').value='';
+  document.getElementById('filterYear').value='2024';
+  document.getElementById('filterMonth').value='6';
+  document.getElementById('filterCompareYear').value='2023';
+  refreshData();
+}
+
+function renderAll(){
+  const kpi=generateKPI();
+  renderKPIs(kpi);
+  renderHighClaimTable();
+}
+
+window.onload=()=>{renderAll()};
+</script>
+<script src="js/common.js"></script>
+</body>
+</html>

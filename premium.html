@@ -82,16 +82,6 @@
               <input type="text" id="customerService" placeholder="请输入客服姓名">
               <span class="help-icon" data-title="输入客服姓名进行精准查询">?</span>
             </div>
-            <div class="form-item">
-              <label>所属保司</label>
-              <select id="insuranceCompany">
-                <option value="">全部</option>
-                <option value="chinalife">中国人寿</option>
-                <option value="pingan">中国平安</option>
-                <option value="picc">中国人保</option>
-              </select>
-              <span class="help-icon" data-title="按保险公司筛选数据">?</span>
-            </div>
             <button type="button" class="search-btn" onclick="search()">查询</button>
             <button type="button" class="search-btn" style="background:#d9d9d9" onclick="resetForm()">重置</button>
           </form>
@@ -105,23 +95,6 @@
           <div>
             <span class="label">补医产品：</span>
             <span class="items">补充医疗、意外险、大额医疗、易企药安心、百万医疗、易企保</span>
-          </div>
-        </div>
-
-        <div class="charts-grid">
-          <div class="chart-card">
-            <div class="chart-title">
-              保费趋势（补医）
-              <span class="help-icon" data-title="根据查询截止年月，往前推12个月（不含查询当月）">?</span>
-            </div>
-            <div class="chart-container" id="chartSupplement"></div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">
-              保费趋势（雇主）
-              <span class="help-icon" data-title="根据查询截止年月，往前推12个月（不含查询当月）">?</span>
-            </div>
-            <div class="chart-container" id="chartEmployer"></div>
           </div>
         </div>
 
@@ -150,6 +123,23 @@
           </table>
           </div>
         </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-title">
+              保费趋势（补医）
+              <span class="help-icon" data-title="根据查询截止年月，往前推12个月（不含查询当月）">?</span>
+            </div>
+            <div class="chart-container" id="chartSupplement"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">
+              保费趋势（雇主）
+              <span class="help-icon" data-title="根据查询截止年月，往前推12个月（不含查询当月）">?</span>
+            </div>
+            <div class="chart-container" id="chartEmployer"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -166,8 +156,7 @@
       var endDate = document.getElementById('endDate').value;
       var insuranceType = document.getElementById('insuranceType').value;
       var customerService = document.getElementById('customerService').value;
-      var insuranceCompany = document.getElementById('insuranceCompany').value;
-      console.log('查询条件:', { endDate, insuranceType, customerService, insuranceCompany });
+      console.log('查询条件:', { endDate, insuranceType, customerService });
     }
 
     function resetForm() {
@@ -177,7 +166,6 @@
       document.getElementById('endDate').value = year + '-' + month;
       document.getElementById('insuranceType').value = '';
       document.getElementById('customerService').value = '';
-      document.getElementById('insuranceCompany').value = '';
     }
 
     function viewDetail() {
