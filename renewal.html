@@ -49,8 +49,11 @@
       width: 100%;
       height: 300px;
     }
-    .grid-4 {
+    .grid-5 {
       margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
     }
     .status-tag {
       display: inline-block;
@@ -100,9 +103,14 @@
           <div class="card-title">查询条件</div>
           <form class="search-form">
             <div class="form-item">
+              <label>起始年月</label>
+              <input type="month" id="startDate" value="">
+              <span class="help-icon" data-title="选择查询起始月份">?</span>
+            </div>
+            <div class="form-item">
               <label>截止年月</label>
               <input type="month" id="endDate" value="">
-              <span class="help-icon" data-title="选择数据统计截止月份，默认为当前月份">?</span>
+              <span class="help-icon" data-title="选择查询截止月份，默认为当前月份">?</span>
             </div>
             <div class="form-item">
               <label>保险类别</label>
@@ -113,17 +121,12 @@
               </select>
               <span class="help-icon" data-title="按保险类别筛选续签数据">?</span>
             </div>
-            <div class="form-item">
-              <label>所属客服</label>
-              <input type="text" id="customerService" placeholder="请输入所属客服">
-              <span class="help-icon" data-title="按所属客服筛选续签数据">?</span>
-            </div>
             <button type="button" class="search-btn" onclick="search()">查询</button>
             <button type="button" class="search-btn" style="background:#d9d9d9" onclick="resetForm()">重置</button>
           </form>
         </div>
 
-        <div class="grid-4" style="gap:16px">
+        <div class="grid-5" style="gap:16px">
           <div class="kpi-card">
             <div class="kpi-label">
               应续保费
@@ -156,12 +159,20 @@
             <div class="kpi-value">¥228.8万</div>
             <div class="kpi-change negative">同期 ¥223.7万 · +2.3%</div>
           </div>
+          <div class="kpi-card">
+            <div class="kpi-label">
+              在保人数
+              <span class="help-icon" data-title="查询日期范围内的在保人数">?</span>
+            </div>
+            <div class="kpi-value">3,856人</div>
+            <div class="kpi-change">同期 3,782人 · +2.0%</div>
+          </div>
         </div>
 
         <div class="chart-card">
           <div class="chart-title">
-            <span id="chartTitle"></span>12月续签保费对比（应续保费 vs 实续保费）</span>
-            <span class="help-icon" data-title="根据查询截止月份，展示近12个月份的应续保费和实续保费对比">?</span>
+            <span id="chartTitle"></span>
+            <span class="help-icon" data-title="根据查询起止月份，展示时间段内各月份的应续保费和实续保费对比">?</span>
           </div>
           <div class="chart-container" id="renewalChart"></div>
         </div>
@@ -172,7 +183,7 @@
               <span class="mini-icon"></span>
               续签明细
             </span>
-            <span class="help-icon" data-title="根据查询截止年月，往前推12个月（不含查询当月）的续签明细数据">?</span>
+            <span class="help-icon" data-title="根据查询起止月份，展示时间段内各月份的续签明细数据">?</span>
             <button type="button" class="search-btn" style="margin-left:auto;font-size:12px;padding:6px 16px" onclick="viewDetail()">查看明细</button>
           </div>
           <div style="overflow-x:auto">
@@ -202,16 +213,19 @@
       var today = new Date();
       var year = today.getFullYear();
       var month = String(today.getMonth() + 1).padStart(2, '0');
+      var startYear = year;
+      var startMonth = String(today.getMonth() + 1).padStart(2, '0');
+      document.getElementById('startDate').value = startYear + '-' + startMonth;
       document.getElementById('endDate').value = year + '-' + month;
       initChart();
       renderTable();
     });
 
     function search() {
+      var startDate = document.getElementById('startDate').value;
       var endDate = document.getElementById('endDate').value;
       var insuranceType = document.getElementById('insuranceType').value;
-      var customerService = document.getElementById('customerService').value;
-      console.log('查询条件:', { endDate, insuranceType, customerService });
+      console.log('查询条件:', { startDate, endDate, insuranceType });
       if (chartInstance) {
         chartInstance.dispose();
         chartInstance = null;
@@ -228,9 +242,9 @@
       var today = new Date();
       var year = today.getFullYear();
       var month = String(today.getMonth() + 1).padStart(2, '0');
+      document.getElementById('startDate').value = year + '-' + month;
       document.getElementById('endDate').value = year + '-' + month;
       document.getElementById('insuranceType').value = '';
-      document.getElementById('customerService').value = '';
       if (chartInstance) {
         chartInstance.dispose();
         chartInstance = null;
@@ -239,19 +253,24 @@
       renderTable();
     }
 
-    function getMonthsBefore(endDate, count) {
-      var parts = endDate.split('-');
-      var year = parseInt(parts[0]);
-      var month = parseInt(parts[1]);
+    function getMonthsRange(startDate, endDate) {
+      if (!startDate || !endDate) return [];
+      var startParts = startDate.split('-');
+      var endParts = endDate.split('-');
+      var startYear = parseInt(startParts[0]);
+      var startMonth = parseInt(startParts[1]);
+      var endYear = parseInt(endParts[0]);
+      var endMonth = parseInt(endParts[1]);
       var months = [];
-      for (var i = 0; i < count; i++) {
-        var m = month - i;
-        var y = year;
-        while (m <= 0) {
-          m += 12;
-          y--;
+      var y = startYear;
+      var m = startMonth;
+      while (y < endYear || (y === endYear && m <= endMonth)) {
+        months.push(y + '-' + String(m).padStart(2, '0'));
+        m++;
+        if (m > 12) {
+          m = 1;
+          y++;
         }
-        months.unshift(y + '-' + String(m).padStart(2, '0'));
       }
       return months;
     }
@@ -267,10 +286,11 @@
     }
 
     function renderTable() {
+      var startDate = document.getElementById('startDate').value;
       var endDate = document.getElementById('endDate').value;
-      if (!endDate) return;
+      if (!startDate || !endDate) return;
 
-      var months = getMonthsBefore(endDate, 12);
+      var months = getMonthsRange(startDate, endDate);
       var tbody = document.getElementById('renewalTableBody');
       var html = '';
 
@@ -301,10 +321,12 @@
     var chartInstance = null;
 
     function initChart() {
+      var startDate = document.getElementById('startDate').value;
       var endDate = document.getElementById('endDate').value;
-      if (!endDate) return;
-      var months = getMonthsBefore(endDate, 12);
-      document.getElementById('chartTitle').textContent = months[0] + '至' + months[months.length - 1] 
+      if (!startDate || !endDate) return;
+      var months = getMonthsRange(startDate, endDate);
+      var monthCount = months.length || 1;
+      document.getElementById('chartTitle').textContent = months[0] + '至' + months[months.length - 1] + ' ' + monthCount + '月续签保费对比（应续保费 vs 实续保费）';
       var chart = echarts.init(document.getElementById('renewalChart'));
       chart.setOption({
         tooltip: {

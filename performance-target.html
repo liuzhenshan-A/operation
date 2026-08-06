@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>业绩目标管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;font-size:13px;color:#333;background:#f0f2f5}
+.layout{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:200px;background:#001529;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{height:56px;padding:0 20px;color:#fff;font-size:15px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.sidebar-logo .logo-icon{width:28px;height:28px;background:#1890ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700}
+.sidebar-menu{flex:1;overflow-y:auto;padding:4px 0}
+.sidebar-menu .menu-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:rgba(255,255,255,.65);cursor:pointer;font-size:13px;transition:all .15s;position:relative}
+.sidebar-menu .menu-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.sidebar-menu .menu-item.active{color:#fff;background:#1890ff}
+.sub-menu{padding:4px 0 6px 0}
+.sub-menu .sub-item{padding:6px 20px 6px 56px;color:rgba(255,255,255,.65);font-size:13px;cursor:pointer;transition:all .15s}
+.sub-menu .sub-item:hover{color:#fff}
+.sub-menu .sub-item.active{color:#fff;background:rgba(24,144,255,.15);font-weight:500;border-left:3px solid #fff}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f0f2f5}
+.header{height:56px;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.breadcrumb{font-size:13px;color:#666}
+.breadcrumb .sep{color:#ccc;margin:0 6px}
+.breadcrumb .current{color:#333;font-weight:500}
+.content{flex:1;overflow:auto;padding:16px}
+.page-title{font-size:16px;font-weight:600;color:#333;margin-bottom:16px}
+.card{background:#fff;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.03);margin-bottom:16px}
+.toolbar{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.toolbar .filter-group{display:flex;align-items:center;gap:6px}
+.toolbar label{color:#666;font-size:13px;white-space:nowrap}
+.toolbar select,.toolbar input{height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 30px 0 10px;font-size:13px;color:#333;background:#fff;appearance:none;cursor:pointer;min-width:110px}
+.toolbar .btn{height:32px;padding:0 16px;border-radius:4px;font-size:13px;cursor:pointer;border:1px solid #d9d9d9;background:#fff;color:#333}
+.toolbar .btn:hover{border-color:#1890ff;color:#1890ff}
+.toolbar .btn.primary{background:#1890ff;border-color:#1890ff;color:#fff}
+.toolbar .btn.primary:hover{background:#40a9ff}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:6px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);border-left:3px solid #1890ff}
+.kpi-card .kpi-label{font-size:13px;color:#8c8c8c;margin-bottom:8px}
+.kpi-card .kpi-value{font-size:26px;font-weight:600;color:#333;margin-bottom:4px}
+.kpi-card .kpi-sub{font-size:12px;color:#8c8c8c}
+.kpi-card.success{border-left-color:#52c41a}
+.kpi-card.warning{border-left-color:#faad14}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#fafafa;padding:12px 16px;text-align:left;font-weight:500;color:#333;border-bottom:1px solid #f0f0f0;white-space:nowrap}
+tbody td{padding:12px 16px;border-bottom:1px solid #f0f0f0;white-space:nowrap;color:#333}
+tbody tr:hover{background:#f5faff}
+tbody tr:last-child td{border-bottom:none}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;line-height:18px}
+.tag.green{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
+.tag.orange{background:#fff7e6;color:#fa8c16;border:1px solid #ffd591}
+.tag.blue{background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff}
+.tag.gray{background:#f5f5f5;color:#8c8c8c;border:1px solid #d9d9d9}
+.dept-tag{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;line-height:18px;font-weight:500}
+.dept-tag.shangbao{background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff}
+.dept-tag.jingji{background:#f9f0ff;color:#722ed1;border:1px solid #d3adf7}
+.progress-bar{width:100%;height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px;max-width:120px}
+.progress-bar .progress{height:100%;border-radius:3px;transition:width .3s}
+.progress-bar .progress.success{background:#52c41a}
+.progress-bar .progress.warning{background:#faad14}
+.progress-bar .progress.danger{background:#ff4d4f}
+.rate-text{font-size:12px;font-weight:500}
+.rate-text.success{color:#52c41a}
+.rate-text.danger{color:#ff4d4f}
+.op-btn{color:#1890ff;cursor:pointer;margin-right:8px;font-size:12px;background:none;border:none;padding:0}
+.op-btn:hover{text-decoration:underline}
+.op-btn.danger{color:#ff4d4f}
+.pagination{padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.pagination-info{color:#666;font-size:13px}
+.pagination-controls{display:flex;align-items:center;gap:4px}
+.pagination-controls .page-btn{min-width:32px;height:32px;border:1px solid #d9d9d9;background:#fff;border-radius:4px;font-size:13px;cursor:pointer;color:#333;display:inline-flex;align-items:center;justify-content:center;padding:0 8px}
+.pagination-controls .page-btn:hover:not(:disabled){border-color:#1890ff;color:#1890ff}
+.pagination-controls .page-btn.active{background:#1890ff;border-color:#1890ff;color:#fff}
+.pagination-controls .page-btn:disabled{color:#bfbfbf;cursor:not-allowed;background:#f5f5f5}
+.modal-mask{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center}
+.modal-mask.show{display:flex}
+.modal{background:#fff;border-radius:6px;width:560px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-lg{width:720px}
+.modal-header{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:500;color:#333}
+.modal-close{cursor:pointer;font-size:18px;color:#999;background:none;border:none}
+.modal-body{padding:20px;flex:1;overflow:auto}
+.modal-footer{padding:12px 20px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:8px}
+.modal-tip{background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;padding:12px;color:#8c6d1f;font-size:12px;margin-bottom:16px;line-height:1.6}
+.modal-tip a{color:#1890ff;cursor:pointer;text-decoration:underline}
+.upload-area{border:2px dashed #d9d9d9;border-radius:6px;padding:30px;text-align:center;cursor:pointer;transition:border-color .2s}
+.upload-area:hover{border-color:#1890ff}
+.upload-area .upload-icon{font-size:36px;color:#1890ff;margin-bottom:8px}
+.upload-area .upload-text{color:#666;font-size:13px;margin-bottom:4px}
+.upload-area .upload-hint{color:#999;font-size:12px}
+.upload-area.has-file{border-color:#52c41a;background:#f6ffed}
+.upload-area .file-name{color:#52c41a;font-size:13px}
+.detail-row{display:flex;margin-bottom:12px;border-bottom:1px dashed #f0f0f0;padding-bottom:8px}
+.detail-row .detail-label{width:120px;color:#8c8c8c;font-size:13px;flex-shrink:0}
+.detail-row .detail-value{flex:1;color:#333;font-size:13px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;margin-bottom:6px;color:#666;font-size:13px}
+.form-group label .required{color:#ff4d4f;margin-right:2px}
+.form-group input,.form-group select,.form-group textarea{width:100%;height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 10px;font-size:13px}
+.form-group textarea{height:80px;padding:8px 10px;resize:vertical}
+.confirm-icon{text-align:center;margin-bottom:16px}
+.confirm-icon .icon{width:48px;height:48px;border-radius:50%;background:#fff1f0;color:#ff4d4f;font-size:24px;display:inline-flex;align-items:center;justify-content:center}
+.confirm-text{text-align:center;font-size:15px;font-weight:500;margin-bottom:8px}
+.confirm-sub{text-align:center;color:#666;font-size:13px;margin-bottom:20px}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">易</div>易才商保</div>
+    <nav class="sidebar-menu">
+      <div class="menu-item">首页</div>
+      <div class="menu-item">工作台</div>
+      <div class="menu-item">合同管理</div>
+      <div class="menu-item">保单管理</div>
+      <div class="menu-item">个人投保</div>
+      <div class="menu-item">财务管理</div>
+      <div class="menu-item">收付管理</div>
+      <div class="menu-item">理赔管理</div>
+      <div class="menu-item" style="background:rgba(255,255,255,.04);font-weight:500">销售管理</div>
+      <div class="sub-menu">
+        <div class="sub-item" onclick="location.href='performance.html'">业绩管理</div>
+        <div class="sub-item active">业绩目标管理</div>
+        <div class="sub-item" onclick="location.href='renewal-target.html'">续签指标管理</div>
+        <div class="sub-item">提成管理</div>
+      </div>
+      <div class="menu-item">综合报表</div>
+      <div class="menu-item">险种计划管理</div>
+      <div class="menu-item">系统管理</div>
+    </nav>
+  </aside>
+  <main class="main">
+    <header class="header">
+      <div class="breadcrumb">首页 / 销售管理 / <span class="current">业绩目标管理</span></div>
+    </header>
+    <div class="content">
+      <div class="page-title">业绩目标管理</div>
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-label">总目标（万元）</div><div class="kpi-value">3,200</div><div class="kpi-sub">全年累计</div></div>
+        <div class="kpi-card success"><div class="kpi-label">已完成（万元）</div><div class="kpi-value">2,180</div><div class="kpi-sub">完成率 68.1%</div></div>
+        <div class="kpi-card warning"><div class="kpi-label">差额（万元）</div><div class="kpi-value">1,020</div><div class="kpi-sub">距年底还需完成</div></div>
+        <div class="kpi-card"><div class="kpi-label">本月目标（万元）</div><div class="kpi-value">280</div><div class="kpi-sub">本月完成 196</div></div>
+      </div>
+      <div class="card">
+        <div class="toolbar">
+          <div class="filter-group"><label>年月：</label>
+            <select id="filter-month"><option value="">全部</option><option>2026年1月</option><option>2026年2月</option><option>2026年3月</option><option>2026年4月</option><option>2026年5月</option></select>
+          </div>
+          <div class="filter-group"><label>部门：</label>
+            <select id="filter-dept"><option value="">全部</option><option>商保</option><option>经纪</option></select>
+          </div>
+          <div class="filter-group"><label>产品：</label>
+            <select id="filter-product"><option value="">全部</option><option>补充医疗</option><option>雇主</option><option>经纪自拓</option><option>商保代开</option><option>团险外投</option><option>BBC</option></select>
+          </div>
+          <div class="filter-group"><label>新增/存量：</label>
+            <select id="filter-type"><option value="">全部</option><option>新增</option><option>存量</option></select>
+          </div>
+          <div class="filter-group"><label>大区：</label>
+            <select id="filter-region"><option value="">全部</option><option>北京</option><option>上海</option><option>广州</option><option>深圳</option><option>成都</option><option>杭州</option></select>
+          </div>
+          <div class="filter-group"><label>城市：</label>
+            <select id="filter-city"><option value="">全部</option><option>北京</option><option>上海</option><option>广州</option><option>深圳</option><option>成都</option><option>杭州</option><option>天津</option><option>济南</option><option>青岛</option><option>沈阳</option></select>
+          </div>
+          <button class="btn primary" onclick="doSearch()">🔍 查询</button>
+          <button class="btn" onclick="doReset()">重置</button>
+        </div>
+        <div class="toolbar" style="border-bottom:none;padding-top:0">
+          <button class="btn primary" onclick="openAddModal()">+ 新增业绩</button>
+          <button class="btn" onclick="openModal('target')">📥 导入业绩指标</button>
+          <button class="btn" onclick="openModal('complete')">📥 导入完成业绩</button>
+          <button class="btn" onclick="openModal('log')">📥 导入日志</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>序号</th><th>部门</th><th>月份</th><th>产品类型</th><th>新增/存量</th><th>大区</th><th>城市</th><th>指标(万)</th><th>完成金额(万)</th><th>达成率</th><th>完成率</th><th>操作</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <div class="pagination-info" id="paginationInfo">共 0 条</div>
+          <div class="pagination-controls" id="paginationControls"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-mask" id="importModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="importModalTitle">导入业绩指标</span>
+      <button class="modal-close" onclick="closeModal('importModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tip" id="importTip">
+        <strong>填写说明：</strong>部门（商保/经纪）| 月份格式（2026年1月）| 产品类型（补充医疗/雇主/商保代开/团险外投/BBC/经纪自拓）| 新增/存量（新增/存量）
+        <br/><a onclick="downloadTemplate()">📥 下载导入模板</a>
+      </div>
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">点击上传文件 或 拖拽文件到此处</div>
+        <div class="upload-hint">支持 .xlsx / .xls 格式文件，文件大小不超过 5MB</div>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleFile(this)">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('importModal')">取消</button>
+      <button class="btn primary" onclick="confirmImport()">确认导入</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="detailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">业绩详情</span>
+      <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('detailModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="editModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="editModalTitle">编辑业绩</span>
+      <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="editBody"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('editModal')">取消</button>
+      <button class="btn primary" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="confirmModal">
+  <div class="modal" style="width:400px">
+    <div class="modal-header">
+      <span class="modal-title">删除确认</span>
+      <button class="modal-close" onclick="closeModal('confirmModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-icon"><div class="icon">!</div></div>
+      <div class="confirm-text">确认删除这条记录？</div>
+      <div class="confirm-sub">删除后数据将无法恢复，请谨慎操作</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('confirmModal')">取消</button>
+      <button class="btn primary" style="background:#ff4d4f;border-color:#ff4d4f" onclick="confirmDelete()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="addModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">新增业绩</span>
+      <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="addBody"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('addModal')">取消</button>
+      <button class="btn primary" onclick="saveAdd()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let tableData = [
+  {id:1, dept:'商保', month:'2026年1月', product:'经纪自拓', type:'存量', region:'北京', city:'北京', target:4.5, actual:0.1},
+  {id:2, dept:'商保', month:'2026年1月', product:'商保代开', type:'存量', region:'北京', city:'天津', target:0.0, actual:null},
+  {id:3, dept:'商保', month:'2026年1月', product:'团险外投', type:'存量', region:'北京', city:'济南', target:0.0, actual:null},
+  {id:4, dept:'商保', month:'2026年1月', product:'BBC', type:'存量', region:'北京', city:'青岛', target:16.2, actual:1.5},
+  {id:5, dept:'商保', month:'2026年2月', product:'经纪自拓', type:'存量', region:'北京', city:'济南', target:7.2, actual:0.3},
+  {id:6, dept:'商保', month:'2026年2月', product:'经纪自拓', type:'存量', region:'北京', city:'沈阳', target:37.8, actual:36.0},
+  {id:7, dept:'商保', month:'2026年2月', product:'商保代开', type:'存量', region:'深圳', city:'深圳', target:12.5, actual:1.0},
+  {id:8, dept:'商保', month:'2026年3月', product:'团险外投', type:'存量', region:'成都', city:'成都', target:5.6, actual:0.7},
+  {id:9, dept:'商保', month:'2026年4月', product:'经纪自拓', type:'存量', region:'广州', city:'广州', target:28.9, actual:25.6},
+  {id:10, dept:'商保', month:'2026年5月', product:'BBC', type:'存量', region:'深圳', city:'深圳', target:15.4, actual:1.2},
+  {id:11, dept:'经纪', month:'2026年1月', product:'经纪自拓', type:'新增', region:'上海', city:'上海', target:20.0, actual:18.5},
+  {id:12, dept:'经纪', month:'2026年1月', product:'补充医疗', type:'新增', region:'北京', city:'北京', target:35.0, actual:28.0},
+  {id:13, dept:'经纪', month:'2026年2月', product:'经纪自拓', type:'存量', region:'广州', city:'广州', target:12.0, actual:12.5},
+  {id:14, dept:'经纪', month:'2026年2月', product:'雇主', type:'新增', region:'深圳', city:'深圳', target:18.0, actual:15.2},
+  {id:15, dept:'经纪', month:'2026年3月', product:'商保代开', type:'存量', region:'上海', city:'上海', target:25.0, actual:22.8},
+  {id:16, dept:'经纪', month:'2026年3月', product:'经纪自拓', type:'新增', region:'杭州', city:'杭州', target:30.0, actual:26.0},
+  {id:17, dept:'经纪', month:'2026年4月', product:'BBC', type:'存量', region:'北京', city:'北京', target:42.0, actual:38.5},
+  {id:18, dept:'经纪', month:'2026年5月', product:'团险外投', type:'新增', region:'成都', city:'成都', target:15.0, actual:10.3},
+  {id:19, dept:'经纪', month:'2026年5月', product:'经纪自拓', type:'存量', region:'广州', city:'广州', target:22.0, actual:24.5},
+  {id:20, dept:'经纪', month:'2026年5月', product:'补充医疗', type:'新增', region:'深圳', city:'深圳', target:28.0, actual:25.0}
+];
+
+let filteredData = [...tableData];
+let currentPage = 1;
+const pageSize = 10;
+let importType = '';
+let editingId = null;
+let deleteId = null;
+
+function calcRate(row) {
+  if (row.target === 0 || row.actual === null || row.actual === undefined) return null;
+  return ((row.actual - row.target) / row.target * 100).toFixed(2);
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const start = (currentPage - 1) * pageSize;
+  const pageData = filteredData.slice(start, start + pageSize);
+  
+  if (pageData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#999;padding:40px">暂无数据</td></tr>';
+  } else {
+    tbody.innerHTML = pageData.map(row => {
+      const rate = calcRate(row);
+      const progressWidth = rate !== null ? Math.min(Math.max(parseFloat(rate) + 100, 0), 100) : 0;
+      const progressClass = rate === null ? 'danger' : parseFloat(rate) >= 0 ? 'success' : 'danger';
+      const rateClass = rate === null ? 'danger' : parseFloat(rate) >= 0 ? 'success' : 'danger';
+      const rateDisplay = rate === null ? '&mdash;' : (parseFloat(rate) >= 0 ? rate + '%' : rate + '%');
+      const actualDisplay = row.actual === null || row.actual === undefined ? '&mdash;' : row.actual;
+      
+      return `<tr>
+        <td>${row.id}</td>
+        <td><span class="dept-tag ${row.dept === '商保' ? 'shangbao' : 'jingji'}">${row.dept}</span></td>
+        <td>${row.month}</td>
+        <td>${row.product}</td>
+        <td><span class="tag ${row.type === '新增' ? 'blue' : 'gray'}">${row.type}</span></td>
+        <td>${row.region}</td>
+        <td>${row.city}</td>
+        <td>${row.target.toFixed(1)}</td>
+        <td>${actualDisplay}</td>
+        <td><span class="rate-text ${rateClass}">${rateDisplay}</span></td>
+        <td><div class="progress-bar"><div class="progress ${progressClass}" style="width:${progressWidth}%"></div></div></td>
+        <td>
+          <button class="op-btn" onclick="viewDetail(${row.id})">查看</button>
+          <button class="op-btn" onclick="editRow(${row.id})">编辑</button>
+          <button class="op-btn danger" onclick="deleteRow(${row.id})">删除</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = filteredData.length;
+  const totalPages = Math.ceil(total / pageSize);
+  document.getElementById('paginationInfo').textContent = `共 ${total} 条`;
+  
+  let html = '';
+  html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">&laquo;</button>`;
+  html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">&lsaquo;</button>`;
+  
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  
+  html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">&rsaquo;</button>`;
+  html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">&raquo;</button>`;
+  
+  document.getElementById('paginationControls').innerHTML = html;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderTable();
+}
+
+function doSearch() {
+  const month = document.getElementById('filter-month').value;
+  const dept = document.getElementById('filter-dept').value;
+  const product = document.getElementById('filter-product').value;
+  const type = document.getElementById('filter-type').value;
+  const region = document.getElementById('filter-region').value;
+  const city = document.getElementById('filter-city').value;
+  
+  filteredData = tableData.filter(row => {
+    if (month && row.month !== month) return false;
+    if (dept && row.dept !== dept) return false;
+    if (product && row.product !== product) return false;
+    if (type && row.type !== type) return false;
+    if (region && row.region !== region) return false;
+    if (city && row.city !== city) return false;
+    return true;
+  });
+  
+  currentPage = 1;
+  renderTable();
+}
+
+function doReset() {
+  ['filter-month','filter-dept','filter-product','filter-type','filter-region','filter-city'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  filteredData = [...tableData];
+  currentPage = 1;
+  renderTable();
+}
+
+function viewDetail(id) {
+  const row = tableData.find(r => r.id === id);
+  if (!row) return;
+  const rate = calcRate(row);
+  const actualDisplay = row.actual === null ? '无' : row.actual.toFixed(1);
+  const rateDisplay = rate === null ? '无' : rate + '%';
+  
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-row"><div class="detail-label">序号</div><div class="detail-value">${row.id}</div></div>
+    <div class="detail-row"><div class="detail-label">部门</div><div class="detail-value">${row.dept}</div></div>
+    <div class="detail-row"><div class="detail-label">月份</div><div class="detail-value">${row.month}</div></div>
+    <div class="detail-row"><div class="detail-label">产品类型</div><div class="detail-value">${row.product}</div></div>
+    <div class="detail-row"><div class="detail-label">新增/存量</div><div class="detail-value">${row.type}</div></div>
+    <div class="detail-row"><div class="detail-label">大区</div><div class="detail-value">${row.region}</div></div>
+    <div class="detail-row"><div class="detail-label">城市</div><div class="detail-value">${row.city}</div></div>
+    <div class="detail-row"><div class="detail-label">指标(万)</div><div class="detail-value">${row.target.toFixed(1)}</div></div>
+    <div class="detail-row"><div class="detail-label">完成金额(万)</div><div class="detail-value">${actualDisplay}</div></div>
+    <div class="detail-row"><div class="detail-label">达成率</div><div class="detail-value">${rateDisplay}</div></div>
+  `;
+  openModal('detailModal');
+}
+
+function editRow(id) {
+  const row = tableData.find(r => r.id === id);
+  if (!row) return;
+  editingId = id;
+  document.getElementById('editModalTitle').textContent = '编辑业绩 - ' + row.id;
+  document.getElementById('editBody').innerHTML = `
+    <div class="form-group"><label>部门</label><select id="edit-dept"><option ${row.dept==='商保'?'selected':''}>商保</option><option ${row.dept==='经纪'?'selected':''}>经纪</option></select></div>
+    <div class="form-group"><label>月份</label><input id="edit-month" value="${row.month}"></div>
+    <div class="form-group"><label>产品类型</label><select id="edit-product">
+      <option ${row.product=='补充医疗'?'selected':''}>补充医疗</option>
+      <option ${row.product=='雇主'?'selected':''}>雇主</option>
+      <option ${row.product=='经纪自拓'?'selected':''}>经纪自拓</option>
+      <option ${row.product=='商保代开'?'selected':''}>商保代开</option>
+      <option ${row.product=='团险外投'?'selected':''}>团险外投</option>
+      <option ${row.product=='BBC'?'selected':''}>BBC</option>
+    </select></div>
+    <div class="form-group"><label>新增/存量</label><select id="edit-type"><option ${row.type=='新增'?'selected':''}>新增</option><option ${row.type=='存量'?'selected':''}>存量</option></select></div>
+    <div class="form-group"><label>大区</label><input id="edit-region" value="${row.region}"></div>
+    <div class="form-group"><label>城市</label><input id="edit-city" value="${row.city}"></div>
+    <div class="form-group"><label>指标(万)</label><input id="edit-target" type="number" step="0.1" value="${row.target}"></div>
+    <div class="form-group"><label>完成金额(万)</label><input id="edit-actual" type="number" step="0.1" value="${row.actual ?? ''}" placeholder="可留空"></div>
+  `;
+  openModal('editModal');
+}
+
+function saveEdit() {
+  const row = tableData.find(r => r.id === editingId);
+  if (!row) return;
+  row.dept = document.getElementById('edit-dept').value;
+  row.month = document.getElementById('edit-month').value;
+  row.product = document.getElementById('edit-product').value;
+  row.type = document.getElementById('edit-type').value;
+  row.region = document.getElementById('edit-region').value;
+  row.city = document.getElementById('edit-city').value;
+  row.target = parseFloat(document.getElementById('edit-target').value) || 0;
+  const actualVal = document.getElementById('edit-actual').value;
+  row.actual = actualVal === '' ? null : parseFloat(actualVal);
+  
+  closeModal('editModal');
+  doSearch();
+}
+
+function deleteRow(id) {
+  deleteId = id;
+  openModal('confirmModal');
+}
+
+function confirmDelete() {
+  if (deleteId !== null) {
+    tableData = tableData.filter(r => r.id !== deleteId);
+    filteredData = filteredData.filter(r => r.id !== deleteId);
+    closeModal('confirmModal');
+    deleteId = null;
+    doSearch();
+  }
+}
+
+function openAddModal() {
+  document.getElementById('addBody').innerHTML = `
+    <div class="form-group"><label><span class="required">*</span>部门</label><select id="add-dept"><option>商保</option><option>经纪</option></select></div>
+    <div class="form-group"><label><span class="required">*</span>月份</label><input id="add-month" placeholder="如：2026年6月"></div>
+    <div class="form-group"><label><span class="required">*</span>产品类型</label><select id="add-product">
+      <option>补充医疗</option><option>雇主</option><option>经纪自拓</option><option>商保代开</option><option>团险外投</option><option>BBC</option>
+    </select></div>
+    <div class="form-group"><label><span class="required">*</span>新增/存量</label><select id="add-type"><option>新增</option><option>存量</option></select></div>
+    <div class="form-group"><label><span class="required">*</span>大区</label><input id="add-region" placeholder="如：北京"></div>
+    <div class="form-group"><label><span class="required">*</span>城市</label><input id="add-city" placeholder="如：北京"></div>
+    <div class="form-group"><label><span class="required">*</span>指标(万)</label><input id="add-target" type="number" step="0.1" placeholder="请输入指标金额"></div>
+    <div class="form-group"><label>完成金额(万)</label><input id="add-actual" type="number" step="0.1" placeholder="可留空，导入完成业绩后再填写"></div>
+  `;
+  openModal('addModal');
+}
+
+function saveAdd() {
+  const dept = document.getElementById('add-dept').value;
+  const month = document.getElementById('add-month').value.trim();
+  const product = document.getElementById('add-product').value;
+  const type = document.getElementById('add-type').value;
+  const region = document.getElementById('add-region').value.trim();
+  const city = document.getElementById('add-city').value.trim();
+  const target = parseFloat(document.getElementById('add-target').value);
+  const actualVal = document.getElementById('add-actual').value;
+  const actual = actualVal === '' ? null : parseFloat(actualVal);
+  
+  if (!month) { alert('请输入月份'); return; }
+  if (!region) { alert('请输入大区'); return; }
+  if (!city) { alert('请输入城市'); return; }
+  if (isNaN(target) || target < 0) { alert('请输入有效的指标金额'); return; }
+  
+  const newId = tableData.length > 0 ? Math.max(...tableData.map(r => r.id)) + 1 : 1;
+  tableData.push({id:newId, dept, month, product, type, region, city, target, actual});
+  
+  closeModal('addModal');
+  doSearch();
+}
+
+function openModal(type) {
+  const modal = type === 'target' || type === 'complete' || type === 'log' ? 'importModal' : type;
+  if (type === 'target' || type === 'complete' || type === 'log') {
+    importType = type;
+    const titles = {'target':'导入业绩指标','complete':'导入完成业绩','log':'导入日志'};
+    const tips = {
+      'target':'<strong>填写说明：</strong>部门（商保/经纪）| 月份格式（2026年1月）| 产品类型（补充医疗/雇主/经纪自拓/商保代开/团险外投/BBC）| 新增/存量（新增/存量）<br/><a onclick="downloadTemplate()">📥 下载导入模板</a>',
+      'complete':'<strong>填写说明：</strong>部门（商保/经纪）| 月份格式（2026年1月）| 产品类型（补充医疗/雇主/经纪自拓/商保代开/团险外投/BBC）| 完成金额(万元)<br/><a onclick="downloadTemplate()">📥 下载导入模板</a>',
+      'log':'<strong>填写说明：</strong>操作类型|操作时间|操作人|操作详情<br/><a onclick="downloadTemplate()">📥 下载导入模板</a>'
+    };
+    document.getElementById('importModalTitle').textContent = titles[type];
+    document.getElementById('importTip').innerHTML = tips[type];
+    document.getElementById('fileInput').value = '';
+    const area = document.getElementById('uploadArea');
+    area.classList.remove('has-file');
+    area.innerHTML = '<div class="upload-icon">📁</div><div class="upload-text">点击上传文件 或 拖拽文件到此处</div><div class="upload-hint">支持 .xlsx / .xls 格式文件，文件大小不超过 5MB</div>';
+    document.getElementById('importModal').classList.add('show');
+  } else {
+    document.getElementById(type).classList.add('show');
+  }
+}
+
+function closeModal(type) {
+  document.getElementById(type).classList.remove('show');
+}
+
+function handleFile(input) {
+  if (input.files.length > 0) {
+    const name = input.files[0].name;
+    const area = document.getElementById('uploadArea');
+    area.classList.add('has-file');
+    area.innerHTML = '<div class="upload-icon" style="color:#52c41a">✅</div><div class="file-name">' + name + '</div><div class="upload-hint">点击重新选择文件</div>';
+  }
+}
+
+function downloadTemplate() {
+  let headers = [], sample = [], filename = '';
+  
+  if (importType === 'target') {
+    headers = ['部门','月份','产品类型','新增/存量','大区','城市','指标(万)'];
+    sample = [['商保','2026年1月','补充医疗','新增','北京','北京',680]];
+    filename = '业绩指标导入模板.csv';
+  } else if (importType === 'complete') {
+    headers = ['部门','月份','产品类型','大区','城市','完成金额(万)'];
+    sample = [['商保','2026年1月','补充医疗','北京','北京',680.9]];
+    filename = '完成业绩导入模板.csv';
+  } else {
+    headers = ['操作类型','操作时间','操作人','操作详情'];
+    sample = [['新增','2026-01-15 10:30','张三','新增2026年1月商保补充医疗指标680万']];
+    filename = '日志导入模板.csv';
+  }
+  
+  let csv = '\ufeff' + headers.join(',') + '\n';
+  csv += sample.map(row => row.join(',')).join('\n');
+  
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function confirmImport() {
+  if (!document.getElementById('fileInput').files.length) {
+    alert('请先上传文件');
+    return;
+  }
+  alert('导入成功！');
+  closeModal('importModal');
+}
+
+renderTable();
+</script>
+</body>
+</html>

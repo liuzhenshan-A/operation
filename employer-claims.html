@@ -48,13 +48,22 @@
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{background:#f9fafc;padding:11px 14px;text-align:left;font-weight:600;color:var(--c-text2);border-bottom:2px solid var(--c-border);white-space:nowrap;position:sticky;top:0;font-size:12px;letter-spacing:.1px}
-thead th.num{text-align:right}
+thead th.num{text-align:left}
+thead th:first-child{text-align:left}
+thead th:not(:first-child):not(.num){text-align:left}
 tbody td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--c-border-light);white-space:nowrap;font-variant-numeric:tabular-nums}
-tbody td.num{text-align:right}
+tbody td.num{text-align:left}
+tbody td:first-child{text-align:left}
 tbody tr{transition:background .12s}
 tbody tr:hover{background:var(--c-row-hover)}
 tbody tr.group-row td{font-weight:650;color:var(--c-text);border-bottom:1px solid var(--c-border);background:#fafbfd;font-size:13px}
+.table-wrap{overflow-x:auto}
+.table-wrap table{min-width:900px}
 .amount-high{color:var(--red);font-weight:650}
+.count-high{color:var(--orange);font-weight:600}
+.pct-high{color:var(--red);font-weight:600}
+.pct-mid{color:var(--orange);font-weight:500}
+.pct-low{color:var(--green);font-weight:500}
 @media(max-width:1400px){.kpi-section{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:768px){.kpi-section{grid-template-columns:1fr}.search-form{flex-direction:column;align-items:stretch}}
 </style>
@@ -144,6 +153,22 @@ tbody tr.group-row td{font-weight:650;color:var(--c-text);border-bottom:1px soli
           <div class="table-wrap" id="highClaimTable"></div>
         </div>
       </div>
+      <div class="table-section">
+        <div class="table-card">
+          <div class="table-header-bar">
+            <div class="table-title">行业案件分析<span class="info-tip" data-tip="按行业分类统计案件数量和赔款金额，识别高风险行业。" data-rules="按行业分类汇总，展示案件数、赔款金额、占比及案均赔款。">?</span></div>
+          </div>
+          <div class="table-wrap" id="industryAnalysisTable"></div>
+        </div>
+      </div>
+      <div class="table-section">
+        <div class="table-card">
+          <div class="table-header-bar">
+            <div class="table-title">出险原因分析<span class="info-tip" data-tip="按出险原因分类统计案件数量和赔款金额，识别主要出险因素。" data-rules="按出险原因分类汇总，展示案件数、赔款金额、占比及案均赔款。">?</span></div>
+          </div>
+          <div class="table-wrap" id="causeAnalysisTable"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -216,6 +241,33 @@ function generateHighClaimCustomers(){
   ];
 }
 
+function generateIndustryAnalysis(){
+  return [
+    {industry:'互联网/IT',claimCount:86,claimAmount:142.80},
+    {industry:'制造业',claimCount:72,claimAmount:128.50},
+    {industry:'建筑业',claimCount:58,claimAmount:98.60},
+    {industry:'交通运输',claimCount:45,claimAmount:76.20},
+    {industry:'批发零售',claimCount:38,claimAmount:62.40},
+    {industry:'餐饮住宿',claimCount:32,claimAmount:48.30},
+    {industry:'专业服务',claimCount:28,claimAmount:45.60},
+    {industry:'金融业',claimCount:22,claimAmount:38.20},
+    {industry:'其他行业',claimCount:15,claimAmount:22.40}
+  ];
+}
+
+function generateCauseAnalysis(){
+  return [
+    {cause:'交通事故',claimCount:92,claimAmount:168.50},
+    {cause:'交通事故死亡',claimCount:68,claimAmount:125.30},
+    {cause:'工伤事故',claimCount:52,claimAmount:88.60},
+    {cause:'工伤事故死亡',claimCount:48,claimAmount:76.40},
+    {cause:'意外伤害',claimCount:38,claimAmount:62.20},
+    {cause:'意外伤害死亡',claimCount:28,claimAmount:48.50},
+    {cause:'猝死',claimCount:18,claimAmount:32.80},
+    {cause:'重疾事故',claimCount:16,claimAmount:25.20}
+  ];
+}
+
 function renderKPIs(kpi){
   const keys=['premium','available','used','claimRate'];
   document.getElementById('kpiCards').innerHTML=keys.map(k=>{
@@ -251,8 +303,8 @@ function renderHighClaimTable(){
         <th>合同方名称</th>
         <th>付款方名称</th>
         <th>团单号码</th>
-        <th class="num">出险人数</th>
-        <th class="num">赔款金额（万元）</th>
+        <th>出险人数</th>
+        <th>赔款金额（万元）</th>
       </tr>
     </thead>
     <tbody>`;
@@ -261,19 +313,129 @@ function renderHighClaimTable(){
       <td>${d.contract}</td>
       <td>${d.payer}</td>
       <td>${d.policyNo}</td>
-      <td class="num">${d.claimCount}</td>
-      <td class="num amount-high">${d.claimAmount.toFixed(2)}</td>
+      <td>${d.claimCount}</td>
+      <td class="amount-high">${d.claimAmount.toFixed(2)}</td>
     </tr>`;
   });
   h+=`<tr class="group-row" style="background:#f0f3ff">
     <td><strong>合计</strong></td>
     <td></td>
     <td></td>
-    <td class="num"><strong>${totalClaims}</strong></td>
-    <td class="num amount-high"><strong>${totalAmount.toFixed(2)}</strong></td>
+    <td><strong>${totalClaims}</strong></td>
+    <td class="amount-high"><strong>${totalAmount.toFixed(2)}</strong></td>
   </tr>`;
   h+='</tbody></table>';
   document.getElementById('highClaimTable').innerHTML=h;
+}
+
+function renderIndustryAnalysis(){
+  const data=generateIndustryAnalysis();
+  const totalCount=data.reduce((s,d)=>s+d.claimCount,0);
+  const totalAmount=data.reduce((s,d)=>s+d.claimAmount,0);
+  let h=`<table>
+    <thead>
+      <tr>
+        <th>行业分类</th>
+        <th>案件数</th>
+        <th>赔款金额（万元）</th>
+        <th>案件占比</th>
+        <th>金额占比</th>
+        <th>案均赔款（万元）</th>
+      </tr>
+    </thead>
+    <tbody>`;
+  data.forEach(d=>{
+    const countPct=(d.claimCount/totalCount*100).toFixed(2);
+    const amountPct=(d.claimAmount/totalAmount*100).toFixed(2);
+    const avgAmount=(d.claimAmount/d.claimCount).toFixed(2);
+    h+=`<tr>
+      <td>${d.industry}</td>
+      <td class="count-high">${d.claimCount}</td>
+      <td class="amount-high">${d.claimAmount.toFixed(2)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:8px;background:#f0f3ff;border-radius:4px;overflow:hidden;min-width:60px">
+            <div style="height:100%;width:${countPct}%;background:linear-gradient(90deg,#4f6ef7,#7c5cfc);border-radius:4px"></div>
+          </div>
+          <span style="min-width:55px;text-align:left;color:#595f72;font-weight:500">${countPct}%</span>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:8px;background:#fef1f1;border-radius:4px;overflow:hidden;min-width:60px">
+            <div style="height:100%;width:${amountPct}%;background:linear-gradient(90deg,#f25656,#f5a854);border-radius:4px"></div>
+          </div>
+          <span style="min-width:55px;text-align:left;color:#595f72;font-weight:500">${amountPct}%</span>
+        </div>
+      </td>
+      <td>${avgAmount}</td>
+    </tr>`;
+  });
+  h+=`<tr class="group-row" style="background:#f0f3ff">
+    <td><strong>合计</strong></td>
+    <td><strong>${totalCount}</strong></td>
+    <td class="amount-high"><strong>${totalAmount.toFixed(2)}</strong></td>
+    <td><strong>100%</strong></td>
+    <td><strong>100%</strong></td>
+    <td><strong>${(totalAmount/totalCount).toFixed(2)}</strong></td>
+  </tr>`;
+  h+='</tbody></table>';
+  document.getElementById('industryAnalysisTable').innerHTML=h;
+}
+
+function renderCauseAnalysis(){
+  const data=generateCauseAnalysis();
+  const totalCount=data.reduce((s,d)=>s+d.claimCount,0);
+  const totalAmount=data.reduce((s,d)=>s+d.claimAmount,0);
+  let h=`<table>
+    <thead>
+      <tr>
+        <th>出险原因</th>
+        <th>案件数</th>
+        <th>赔款金额（万元）</th>
+        <th>案件占比</th>
+        <th>金额占比</th>
+        <th>案均赔款（万元）</th>
+      </tr>
+    </thead>
+    <tbody>`;
+  data.forEach(d=>{
+    const countPct=(d.claimCount/totalCount*100).toFixed(2);
+    const amountPct=(d.claimAmount/totalAmount*100).toFixed(2);
+    const avgAmount=(d.claimAmount/d.claimCount).toFixed(2);
+    h+=`<tr>
+      <td>${d.cause}</td>
+      <td class="count-high">${d.claimCount}</td>
+      <td class="amount-high">${d.claimAmount.toFixed(2)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:8px;background:#f0f3ff;border-radius:4px;overflow:hidden;min-width:60px">
+            <div style="height:100%;width:${countPct}%;background:linear-gradient(90deg,#4f6ef7,#7c5cfc);border-radius:4px"></div>
+          </div>
+          <span style="min-width:55px;text-align:left;color:#595f72;font-weight:500">${countPct}%</span>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:8px;background:#fef1f1;border-radius:4px;overflow:hidden;min-width:60px">
+            <div style="height:100%;width:${amountPct}%;background:linear-gradient(90deg,#f25656,#f5a854);border-radius:4px"></div>
+          </div>
+          <span style="min-width:55px;text-align:left;color:#595f72;font-weight:500">${amountPct}%</span>
+        </div>
+      </td>
+      <td>${avgAmount}</td>
+    </tr>`;
+  });
+  h+=`<tr class="group-row" style="background:#f0f3ff">
+    <td><strong>合计</strong></td>
+    <td><strong>${totalCount}</strong></td>
+    <td class="amount-high"><strong>${totalAmount.toFixed(2)}</strong></td>
+    <td><strong>100%</strong></td>
+    <td><strong>100%</strong></td>
+    <td><strong>${(totalAmount/totalCount).toFixed(2)}</strong></td>
+  </tr>`;
+  h+='</tbody></table>';
+  document.getElementById('causeAnalysisTable').innerHTML=h;
 }
 
 let tooltipEl=null,tipTimer=null,tipTarget=null;
@@ -299,6 +461,8 @@ function renderAll(){
   const kpi=generateKPI();
   renderKPIs(kpi);
   renderHighClaimTable();
+  renderIndustryAnalysis();
+  renderCauseAnalysis();
 }
 
 window.onload=()=>{renderAll()};
