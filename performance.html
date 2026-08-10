@@ -7,87 +7,43 @@
   <link rel="stylesheet" href="css/common.css">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
   <style>
-    .tab-header {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .tab-item {
-      padding: 8px 20px;
-      border-radius: 4px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: #f0f0f0;
-      color: #666;
-    }
-    .tab-item.active {
-      background: #1890ff;
-      color: #fff;
-    }
-    .kpi-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .kpi-box {
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-      text-align: left;
-    }
-    .kpi-box .kpi-label {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 8px;
-      text-align: left;
-    }
-    .kpi-box .kpi-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a1a2e;
-      text-align: left;
-    }
-    .kpi-box.highlight {
-      background: #e6f7ff;
-    }
-    .kpi-box.highlight .kpi-value {
-      color: #1890ff;
-    }
-    .chart-card {
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-      margin-bottom: 20px;
-    }
-    .chart-card .chart-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .chart-container {
-      width: 100%;
-      height: 300px;
-    }
-    .change-positive {
-      color: #52c41a;
-    }
-    .change-negative {
-      color: #f5222d;
-    }
-    .detail-section-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin: 20px 0 12px;
-      padding-left: 10px;
-      border-left: 3px solid #1890ff;
-    }
+    .kpi-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,.04); transition: box-shadow .2s; }
+    .kpi-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .kpi-card .kpi-value { font-size: 28px; font-weight: 700; color: #1a1a2e; margin: 8px 0; }
+    .kpi-card .kpi-label { font-size: 13px; color: #666; display: flex; align-items: center; gap: 4px; }
+    .kpi-card .kpi-change { font-size: 12px; color: #52c41a; display: flex; align-items: center; gap: 4px; }
+    .kpi-card .kpi-change.negative { color: #f5222d; }
+    .kpi-card .kpi-sub { font-size: 12px; color: #999; margin-top: 4px; }
+    .chart-card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .chart-card .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .chart-container { width: 100%; height: 320px; }
+    .chart-container-small { width: 100%; height: 280px; }
+    .grid-4 { margin-bottom: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+    .status-tag.success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .status-tag.warning { background: #fffbe6; color: #faad14; border: 1px solid #ffe58f; }
+    .status-tag.danger { background: #fff2f0; color: #f5222d; border: 1px solid #ffccc7; }
+    .tab-switch { display: flex; gap: 0; border-bottom: 2px solid #f0f0f0; }
+    .tab-switch .tab-item { padding: 10px 20px; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
+    .tab-switch .tab-item:hover { color: #1890ff; }
+    .tab-switch .tab-item.active { color: #1890ff; border-bottom-color: #1890ff; font-weight: 500; }
+    .type-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+    .type-tag.dept-shangbao { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .type-tag.dept-jingji { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+    .type-tag.product { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+    .rate-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+    .rate-bar { flex: 1; max-width: 60px; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+    .rate-bar .rate-fill { height: 100%; border-radius: 3px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { background: #fafafa; padding: 12px 16px; text-align: left; font-weight: 500; color: #666; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+    .data-table td { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; color: #333; }
+    .data-table tr:hover td { background: #fafafa; }
+    .help-tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:#e8e8e8;color:#888;font-size:11px;font-weight:700;cursor:help;position:relative;vertical-align:middle;margin-left:5px;flex-shrink:0}
+    .help-tip:hover{background:#1890ff;color:#fff}
+    .help-tip::before{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 12px;border-radius:4px;font-size:12px;font-weight:400;line-height:1.6;white-space:normal;width:max-content;max-width:280px;text-align:left;opacity:0;visibility:hidden;transition:all .2s;z-index:9999;pointer-events:none}
+    .help-tip::after{content:'';position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:rgba(0,0,0,.85);opacity:0;visibility:hidden;transition:all .2s;z-index:9999;pointer-events:none}
+    .help-tip:hover::before,.help-tip:hover::after{opacity:1;visibility:visible}
   </style>
 </head>
 <body>
@@ -104,407 +60,463 @@
         <h2 id="page-title">业绩达成</h2>
       </div>
       <div class="page-body">
+
         <div class="card">
-          <div class="card-title">查询条件</div>
-          <form class="search-form">
+          <div class="card-title">查询条件<span class="help-tip" data-tip="支持按年月范围、部门、产品类型、新增/存量、大区、城市进行多条件筛选，所有KPI和图表均基于筛选结果实时计算">?</span></div>
+          <form class="search-form" onsubmit="return false;">
             <div class="form-item">
-              <label>年月</label>
-              <input type="month" id="yearMonth" value="">
-              <span class="help-icon" data-title="选择数据统计年月">?</span>
+              <label>起始年月</label>
+              <input type="month" id="startDate" value="2026-01">
             </div>
             <div class="form-item">
-              <label>保险类别</label>
-              <select id="insuranceType">
+              <label>截止年月</label>
+              <input type="month" id="endDate" value="2026-08">
+            </div>
+            <div class="form-item">
+              <label>部门</label>
+              <select id="filterDept">
                 <option value="">全部</option>
-                <option value="employer">雇主</option>
-                <option value="supplement">补充</option>
+                <option value="商保">商保</option>
+                <option value="经纪">经纪</option>
               </select>
-              <span class="help-icon" data-title="按保险类别筛选业绩数据">?</span>
             </div>
-            <button type="button" class="search-btn" onclick="search()">查询</button>
-            <button type="button" class="search-btn" style="background:#d9d9d9" onclick="resetForm()">重置</button>
+            <div class="form-item">
+              <label>产品类型</label>
+              <select id="filterProduct">
+                <option value="">全部</option>
+                <option value="补充医疗">补充医疗</option>
+                <option value="雇主">雇主</option>
+                <option value="商保代开">商保代开</option>
+                <option value="团险外投">团险外投</option>
+                <option value="BBC">BBC</option>
+                <option value="经纪自拓">经纪自拓</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>新增/存量</label>
+              <select id="filterType">
+                <option value="">全部</option>
+                <option value="新增">新增</option>
+                <option value="存量">存量</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>大区</label>
+              <select id="filterRegion">
+                <option value="">全部</option>
+                <option value="北京">北京</option>
+                <option value="上海">上海</option>
+                <option value="广州">广州</option>
+                <option value="深圳">深圳</option>
+                <option value="成都">成都</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>城市</label>
+              <select id="filterCity">
+                <option value="">全部</option>
+                <option value="北京">北京</option>
+                <option value="上海">上海</option>
+                <option value="天津">天津</option>
+                <option value="广州">广州</option>
+                <option value="深圳">深圳</option>
+                <option value="青岛">青岛</option>
+                <option value="济南">济南</option>
+                <option value="沈阳">沈阳</option>
+                <option value="重庆">重庆</option>
+                <option value="成都">成都</option>
+                <option value="武汉">武汉</option>
+              </select>
+            </div>
+            <button type="button" class="search-btn" onclick="doSearch()">查询</button>
+            <button type="button" class="search-btn" style="background:#d9d9d9" onclick="doReset()">重置</button>
           </form>
         </div>
 
-        <div class="card">
-          <div class="card-title">业绩概览</div>
-          <div class="tab-header">
-            <div class="tab-item active" onclick="switchTab(this, 'new')">新增业务</div>
-            <div class="tab-item" onclick="switchTab(this, 'stock')">存量业务</div>
-            <div class="tab-item" onclick="switchTab(this, 'total')">合计</div>
+        <div class="grid-4">
+          <div class="kpi-card">
+            <div class="kpi-label">指标合计(万)<span class="help-tip" data-tip="筛选范围内所有业绩记录的指标金额之和（万元），同期对比为模拟去年同期数据">?</span></div>
+            <div class="kpi-value" id="kpiTarget">--</div>
+            <div class="kpi-change" id="kpiTargetChange">同期 --</div>
+            <div class="kpi-sub" id="kpiTargetSub">共 -- 条记录</div>
           </div>
-          <div class="kpi-row">
-            <div class="kpi-box">
-              <div class="kpi-label">
-                当月指标
-                <span class="help-icon" data-title="系统录入的当月需要完成的指标数据">?</span>
-              </div>
-              <div class="kpi-value" id="kpiMonthlyPremium">¥680万</div>
-            </div>
-            <div class="kpi-box">
-              <div class="kpi-label">
-                当月完成
-                <span class="help-icon" data-title="当月实际完成的业绩金额（已出账单）">?</span>
-              </div>
-              <div class="kpi-value" id="kpiMonthlyDone">¥612万</div>
-            </div>
-            <div class="kpi-box highlight">
-              <div class="kpi-label">
-                当月达成率
-                <span class="help-icon" data-title="当月完成 / 当月保费 × 100%">?</span>
-              </div>
-              <div class="kpi-value" id="kpiMonthlyRate">90.0%</div>
-            </div>
+          <div class="kpi-card">
+            <div class="kpi-label">完成金额(万)<span class="help-tip" data-tip="筛选范围内所有业绩记录的实际完成金额之和（万元），达成率=完成金额/指标合计×100%">?</span></div>
+            <div class="kpi-value" id="kpiActual">--</div>
+            <div class="kpi-change" id="kpiActualChange">同期 --</div>
+            <div class="kpi-sub" id="kpiActualSub">达成率 --</div>
           </div>
-          <div class="kpi-row">
-            <div class="kpi-box">
-              <div class="kpi-label">
-                累计指标
-                <span class="help-icon" data-title="年初至当月的业绩目标总额">?</span>
-              </div>
-              <div class="kpi-value" id="kpiCumTarget">¥4,080万</div>
-            </div>
-            <div class="kpi-box">
-              <div class="kpi-label">
-                累计达成
-                <span class="help-icon" data-title="年初至当月实际完成的业绩总额">?</span>
-              </div>
-              <div class="kpi-value" id="kpiCumDone">¥3,825万</div>
-            </div>
-            <div class="kpi-box highlight">
-              <div class="kpi-label">
-                累计达成率
-                <span class="help-icon" data-title="累计达成 / 累计指标 × 100%">?</span>
-              </div>
-              <div class="kpi-value" id="kpiCumRate">93.8%</div>
-            </div>
+          <div class="kpi-card">
+            <div class="kpi-label">达成率<span class="help-tip" data-tip="完成金额 ÷ 指标合计 × 100%。≥100%为已达成，85%-100%为接近达成，＜85%为未达成">?</span></div>
+            <div class="kpi-value" id="kpiRate">--</div>
+            <div class="kpi-change" id="kpiRateChange">同期 --</div>
+            <div class="kpi-sub">目标 100%</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">未完成差额(万)<span class="help-tip" data-tip="指标合计 - 完成金额（万元）。仅统计实际完成金额低于指标金额的记录，反映待完成业绩规模">?</span></div>
+            <div class="kpi-value" id="kpiGap">--</div>
+            <div class="kpi-change negative" id="kpiGapChange">同期 --</div>
+            <div class="kpi-sub" id="kpiGapSub">待完成 --</div>
           </div>
         </div>
 
         <div class="chart-card">
-          <div class="chart-title">
-            <span id="chartTitle">2026年每月业绩达成 vs 达成（目标达成率 vs 达成率）</span>
-            <span class="help-icon" data-title="展示各月份的目标达成率和实际达成率对比">?</span>
-          </div>
-          <div class="chart-container" id="performanceChart"></div>
+          <div class="chart-title"><span>月度业绩达成趋势</span><span class="help-tip" data-tip="按月份汇总筛选范围内的指标金额和完成金额，柱状图对比每月目标与实际完成情况">?</span></div>
+          <div class="chart-container" id="trendChart"></div>
         </div>
 
-        <div class="card">
+        <div class="grid-2">
+          <div class="chart-card" style="margin-bottom:0">
+            <div class="chart-title"><span>部门达成对比</span><span class="help-tip" data-tip="按部门（商保/经纪）汇总指标金额和完成金额，横向柱状图对比各部门业绩达成情况">?</span></div>
+            <div class="chart-container-small" id="deptChart"></div>
+          </div>
+          <div class="chart-card" style="margin-bottom:0">
+            <div class="chart-title"><span>产品类型指标分布</span><span class="help-tip" data-tip="按产品类型汇总指标金额，饼图展示各产品在总指标中的占比分布">?</span></div>
+            <div class="chart-container-small" id="productChart"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
           <div class="card-title">
-            <span class="icon-cell">
-              <span class="mini-icon"></span>
-              业绩明细表
-            </span>
-            <span class="help-icon" data-title="展示业绩达成的详细数据">?</span>
-            <button type="button" class="search-btn" style="margin-left:auto;font-size:12px;padding:6px 16px" onclick="exportData()">导出CSV</button>
+            <span>业绩明细</span><span class="help-tip" data-tip="支持按月份/部门/产品/大区切换维度汇总，计算各维度的指标合计、完成金额、差额和达成率。差额=指标-完成，达成率≥100%为已达成">?</span>
+            <div class="tab-switch" style="margin-left:auto">
+              <div class="tab-item active" onclick="switchTab('month',this)">按月份</div>
+              <div class="tab-item" onclick="switchTab('dept',this)">按部门</div>
+              <div class="tab-item" onclick="switchTab('product',this)">按产品</div>
+              <div class="tab-item" onclick="switchTab('region',this)">按大区</div>
+            </div>
           </div>
-
-          <div class="detail-section-title">新增业务</div>
           <div style="overflow-x:auto">
-            <table class="data-table" id="newBizTable">
-              <thead>
-                <tr>
-                  <th>月份</th>
-                  <th>当月指标(万)</th>
-                  <th>当月达成(万)</th>
-                  <th>当月达成率</th>
-                  <th>累计指标(万)</th>
-                  <th>累计达成(万)</th>
-                  <th>累计达成率</th>
-                  <th>环比增长</th>
-                </tr>
-              </thead>
-              <tbody id="newBizBody"></tbody>
-            </table>
+            <table class="data-table" id="detailTable"></table>
           </div>
-
-          <div class="detail-section-title">存量业务</div>
-          <div style="overflow-x:auto">
-            <table class="data-table" id="stockBizTable">
-              <thead>
-                <tr>
-                  <th>月份</th>
-                  <th>当月指标(万)</th>
-                  <th>当月达成(万)</th>
-                  <th>当月达成率</th>
-                  <th>累计指标(万)</th>
-                  <th>累计达成(万)</th>
-                  <th>累计达成率</th>
-                  <th>环比增长</th>
-                </tr>
-              </thead>
-              <tbody id="stockBizBody"></tbody>
-            </table>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-top:1px solid #f0f0f0">
+            <span style="color:#999;font-size:12px" id="tableInfo">共 0 条</span>
+            <button class="search-btn" onclick="exportCSV()">导出数据</button>
           </div>
         </div>
+
       </div>
     </div>
   </div>
   <script src="js/common.js"></script>
   <script>
-    var currentTab = 'new';
-    var chartInstance = null;
+    var rawData = generateData();
+    var filteredData = rawData.slice();
+    var currentTab = 'month';
+    var chartInst = null;
+    var chartInst2 = null;
+    var chartInst3 = null;
 
-    var kpiData = {
-      '2026': {
-        'new': { monthly: [680,650,700,720,750,780,800,820,850,880,900,920], done: [612,598,630,648,675,702,720,738,765,792,810,828] },
-        'stock': { monthly: [2100,2000,2150,2200,2300,2400,2500,2600,2700,2800,2900,3000], done: [1865,1780,1935,1980,2070,2160,2250,2340,2430,2520,2610,2700] }
-      },
-      '2025': {
-        'new': { monthly: [600,580,620,640,670,700,720,740,770,800,820,840], done: [540,522,558,576,603,630,648,666,693,720,738,756] },
-        'stock': { monthly: [1900,1850,1950,2000,2100,2200,2300,2400,2500,2600,2700,2800], done: [1710,1665,1755,1800,1890,1980,2070,2160,2250,2340,2430,2520] }
-      },
-      '2024': {
-        'new': { monthly: [550,530,570,590,620,650,670,690,720,750,770,790], done: [495,477,513,531,558,585,603,621,648,675,693,711] },
-        'stock': { monthly: [1700,1650,1750,1800,1900,2000,2100,2200,2300,2400,2500,2600], done: [1530,1485,1575,1620,1710,1800,1890,1980,2070,2160,2250,2340] }
+    function generateData() {
+      var data = [];
+      var depts = ['商保', '经纪'];
+      var products = ['补充医疗', '雇主', '商保代开', '团险外投', 'BBC', '经纪自拓'];
+      var regions = ['北京', '上海', '广州', '深圳', '成都'];
+      var cityMap = { '北京': ['北京','天津','济南','青岛','沈阳'], '上海': ['上海','武汉'], '广州': ['广州','深圳'], '深圳': ['深圳'], '成都': ['成都','重庆'] };
+      var months = ['2026年1月','2026年2月','2026年3月','2026年4月','2026年5月','2026年6月','2026年7月','2026年8月'];
+
+      months.forEach(function(m, mi) {
+        depts.forEach(function(d) {
+          products.forEach(function(p) {
+            var reg = regions[Math.floor(Math.random() * regions.length)];
+            var cities = cityMap[reg];
+            var city = cities[Math.floor(Math.random() * cities.length)];
+            var type = Math.random() > 0.4 ? '存量' : '新增';
+            var base = 50 + Math.floor(Math.random() * 200);
+            if (p === '补充医疗' && d === '商保') base = 400 + Math.floor(Math.random() * 500);
+            if (p === '雇主' && d === '商保') base = 150 + Math.floor(Math.random() * 150);
+            var target = Math.round(base * 10) / 10;
+            var actual = Math.round(target * (0.85 + Math.random() * 0.2) * 10) / 10;
+            data.push({ dept: d, month: m, product: p, type: type, region: reg, city: city, target: target, actual: actual });
+          });
+        });
+      });
+      return data;
+    }
+
+    function doSearch() {
+      var startDate = document.getElementById('startDate').value;
+      var endDate = document.getElementById('endDate').value;
+      var dept = document.getElementById('filterDept').value;
+      var product = document.getElementById('filterProduct').value;
+      var type = document.getElementById('filterType').value;
+      var region = document.getElementById('filterRegion').value;
+      var city = document.getElementById('filterCity').value;
+
+      filteredData = rawData.filter(function(d) {
+        var parts = d.month.match(/(\d+)年(\d+)月/);
+        var ym = parts[1] + '-' + (parseInt(parts[2]) < 10 ? '0' + parts[2] : parts[2]);
+        if (startDate && ym < startDate) return false;
+        if (endDate && ym > endDate) return false;
+        if (dept && d.dept !== dept) return false;
+        if (product && d.product !== product) return false;
+        if (type && d.type !== type) return false;
+        if (region && d.region !== region) return false;
+        if (city && d.city !== city) return false;
+        return true;
+      });
+      renderAll();
+    }
+
+    function doReset() {
+      document.getElementById('startDate').value = '2026-01';
+      document.getElementById('endDate').value = '2026-08';
+      document.getElementById('filterDept').value = '';
+      document.getElementById('filterProduct').value = '';
+      document.getElementById('filterType').value = '';
+      document.getElementById('filterRegion').value = '';
+      document.getElementById('filterCity').value = '';
+      filteredData = rawData.slice();
+      renderAll();
+    }
+
+    function renderAll() {
+      renderKPIs();
+      renderCharts();
+      renderTable();
+    }
+
+    function renderKPIs() {
+      var totalTarget = 0, totalActual = 0;
+      filteredData.forEach(function(d) {
+        totalTarget += d.target;
+        totalActual += d.actual;
+      });
+      totalTarget = +totalTarget.toFixed(1);
+      totalActual = +totalActual.toFixed(1);
+      var rate = totalTarget > 0 ? (totalActual / totalTarget * 100).toFixed(1) : '0.0';
+      var gap = +(totalTarget - totalActual).toFixed(1);
+      var cnt = filteredData.length;
+
+      document.getElementById('kpiTarget').textContent = totalTarget.toLocaleString();
+      document.getElementById('kpiActual').textContent = totalActual.toLocaleString();
+      document.getElementById('kpiRate').textContent = rate + '%';
+      document.getElementById('kpiGap').textContent = gap.toLocaleString();
+
+      var lyT = +(totalTarget * 0.985).toFixed(0);
+      var lyA = +(totalActual * 0.982).toFixed(0);
+      var lyR = lyT > 0 ? (lyA / lyT * 100).toFixed(1) : '0';
+      var tChg = ((totalTarget - lyT) / lyT * 100).toFixed(1);
+      var aChg = ((totalActual - lyA) / lyA * 100).toFixed(1);
+      var rChg = (parseFloat(rate) - parseFloat(lyR)).toFixed(1);
+
+      setChg('kpiTargetChange', '同期 ' + lyT.toLocaleString() + ' 万 · ' + (tChg >= 0 ? '+' : '') + tChg + '%', parseFloat(tChg));
+      setChg('kpiActualChange', '同期 ' + lyA.toLocaleString() + ' 万 · ' + (aChg >= 0 ? '+' : '') + aChg + '%', parseFloat(aChg));
+      setChg('kpiRateChange', '同期 ' + lyR + '% · ' + (rChg >= 0 ? '+' : '') + rChg + 'pp', parseFloat(rChg));
+      setChg('kpiGapChange', '同期差额 ' + (lyT - lyA).toLocaleString() + ' 万', -1);
+
+      document.getElementById('kpiTargetSub').textContent = '共 ' + cnt + ' 条记录';
+      document.getElementById('kpiActualSub').textContent = '达成率 ' + rate + '%';
+      var curGap = +(totalTarget - totalActual).toFixed(1);
+      var lyGap = +(lyT - lyA).toFixed(1);
+      var gapChg = lyGap > 0 ? ((curGap - lyGap) / Math.abs(lyGap) * 100).toFixed(1) : '0.0';
+      var gapEl = document.getElementById('kpiGapSub');
+      gapEl.innerHTML = '较同期 ' + (parseFloat(gapChg) >= 0 ? '上升' : '下降') + ' ' + Math.abs(parseFloat(gapChg)) + '%';
+      gapEl.style.color = parseFloat(gapChg) >= 0 ? '#f5222d' : '#52c41a';
+    }
+
+    function setChg(id, text, val) {
+      var el = document.getElementById(id);
+      el.textContent = text;
+      el.classList.remove('negative');
+      if (val < 0 && id !== 'kpiGapChange') el.classList.add('negative');
+    }
+
+    function renderCharts() {
+      if (typeof echarts === 'undefined') return;
+      try {
+        var months = {};
+        filteredData.forEach(function(d) {
+          if (!months[d.month]) months[d.month] = {t: 0, a: 0};
+          months[d.month].t += d.target;
+          months[d.month].a += d.actual;
+        });
+        var labels = Object.keys(months).sort();
+        if (chartInst) chartInst.dispose();
+        chartInst = echarts.init(document.getElementById('trendChart'));
+        chartInst.setOption({
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+          legend: { data: ['指标金额', '完成金额'], bottom: 0 },
+          grid: { top: 30, right: 20, bottom: 50, left: 60 },
+          xAxis: { type: 'category', data: labels, axisLine: { lineStyle: { color: '#e8e8e8' } }, axisLabel: { color: '#999' } },
+          yAxis: { type: 'value', name: '万元', axisLine: { show: false }, axisLabel: { color: '#999' }, splitLine: { lineStyle: { color: '#f0f0f0' } } },
+          series: [
+            { name: '指标金额', type: 'bar', data: labels.map(function(m){return +months[m].t.toFixed(0)}), itemStyle: { color: '#1890ff' }, barWidth: '30%' },
+            { name: '完成金额', type: 'bar', data: labels.map(function(m){return +months[m].a.toFixed(0)}), itemStyle: { color: '#52c41a' }, barWidth: '30%' }
+          ]
+        });
+      } catch(e) {}
+
+      try {
+        var deptMap = {};
+        filteredData.forEach(function(d) {
+          if (!deptMap[d.dept]) deptMap[d.dept] = {t: 0, a: 0};
+          deptMap[d.dept].t += d.target;
+          deptMap[d.dept].a += d.actual;
+        });
+        var depts = Object.keys(deptMap);
+        if (chartInst2) chartInst2.dispose();
+        chartInst2 = echarts.init(document.getElementById('deptChart'));
+        chartInst2.setOption({
+          tooltip: { trigger: 'axis' },
+          legend: { data: ['指标金额', '完成金额'], bottom: 0 },
+          grid: { top: 20, right: 20, bottom: 50, left: 50 },
+          xAxis: { type: 'value', axisLine: { show: false }, axisLabel: { color: '#999' }, splitLine: { lineStyle: { color: '#f0f0f0' } } },
+          yAxis: { type: 'category', data: depts, axisLine: { lineStyle: { color: '#e8e8e8' } }, axisLabel: { color: '#666' } },
+          series: [
+            { name: '指标金额', type: 'bar', data: depts.map(function(d){return +deptMap[d].t.toFixed(1)}), itemStyle: { color: '#1890ff' }, barWidth: '35%' },
+            { name: '完成金额', type: 'bar', data: depts.map(function(d){return +deptMap[d].a.toFixed(1)}), itemStyle: { color: '#52c41a' }, barWidth: '35%' }
+          ]
+        });
+      } catch(e) {}
+
+      try {
+        var prodMap = {};
+        filteredData.forEach(function(d) {
+          if (!prodMap[d.product]) prodMap[d.product] = 0;
+          prodMap[d.product] += d.target;
+        });
+        if (chartInst3) chartInst3.dispose();
+        chartInst3 = echarts.init(document.getElementById('productChart'));
+        chartInst3.setOption({
+          tooltip: { trigger: 'item', formatter: '{b}: {c} 万 ({d}%)' },
+          legend: { orient: 'vertical', right: 10, top: 'center', itemWidth: 10, itemHeight: 10, textStyle: { color: '#666', fontSize: 12 } },
+          series: [{
+            type: 'pie', radius: ['45%', '70%'], center: ['35%', '50%'],
+            itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
+            label: { show: false },
+            data: Object.keys(prodMap).map(function(p){return {name:p, value:+prodMap[p].toFixed(1)}}),
+            color: ['#1890ff', '#52c41a', '#faad14', '#722ed1', '#eb2f96', '#13c2c2']
+          }]
+        });
+      } catch(e) {}
+    }
+
+    function switchTab(tab, el) {
+      currentTab = tab;
+      var items = el.parentElement.querySelectorAll('.tab-item');
+      for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
+      el.classList.add('active');
+      renderTable();
+    }
+
+    function renderTable() {
+      var table = document.getElementById('detailTable');
+      if (!filteredData || filteredData.length === 0) {
+        table.innerHTML = '<tr><td style="text-align:center;padding:40px;color:#999">暂无数据</td></tr>';
+        document.getElementById('tableInfo').textContent = '共 0 条';
+        return;
       }
-    };
 
-    document.addEventListener('DOMContentLoaded', function() {
-      var today = new Date();
-      var year = today.getFullYear();
-      var month = String(today.getMonth() + 1).padStart(2, '0');
-      document.getElementById('yearMonth').value = year + '-' + month;
-      initChart();
-      renderTables();
-      updateKPIs();
+      var headers = '';
+      var rows = '';
+
+      if (currentTab === 'month') {
+        headers = '<tr><th>月份</th><th>指标金额(万)</th><th>完成金额(万)</th><th>差额(万)</th><th>达成率</th></tr>';
+        var g = {};
+        filteredData.forEach(function(d) {
+          if (!g[d.month]) g[d.month] = {t:0, a:0, c:0};
+          g[d.month].t += d.target;
+          g[d.month].a += d.actual;
+          g[d.month].c++;
+        });
+        var keys = Object.keys(g).sort();
+        rows = keys.map(function(m) {
+          var o = g[m];
+          var rate = o.t > 0 ? (o.a / o.t * 100) : 0;
+          rate = +rate.toFixed(1);
+          var diff = +(o.t - o.a).toFixed(1);
+          var status = rate >= 100 ? '<span class="status-tag success">已达成</span>' : rate >= 85 ? '<span class="status-tag warning">接近达成</span>' : '<span class="status-tag danger">未达成</span>';
+          var diffColor = diff > 0 ? '#f5222d' : '#52c41a';
+          var barColor = rate >= 100 ? '#52c41a' : rate >= 85 ? '#faad14' : '#f5222d';
+          return '<tr><td>' + m + '</td><td>' + o.t.toFixed(1) + '</td><td>' + o.a.toFixed(1) + '</td><td style="color:' + diffColor + '">' + diff + '</td><td><div class="rate-bar-wrap"><div class="rate-bar"><div class="rate-fill" style="width:' + Math.min(rate,100) + '%;background:' + barColor + '"></div></div><span style="color:' + barColor + ';font-weight:500;font-size:12px;min-width:55px">' + rate.toFixed(1) + '%</span></div></td>';
+        }).join('');
+      } else if (currentTab === 'dept') {
+        headers = '<tr><th>部门</th><th>指标金额(万)</th><th>完成金额(万)</th><th>差额(万)</th><th>达成率</th></tr>';
+        var g = {};
+        filteredData.forEach(function(d) {
+          if (!g[d.dept]) g[d.dept] = {t:0, a:0, c:0};
+          g[d.dept].t += d.target;
+          g[d.dept].a += d.actual;
+          g[d.dept].c++;
+        });
+        rows = Object.keys(g).map(function(k) {
+          var o = g[k];
+          var rate = o.t > 0 ? (o.a / o.t * 100) : 0;
+          rate = +rate.toFixed(1);
+          var diff = +(o.t - o.a).toFixed(1);
+          var status = rate >= 100 ? '<span class="status-tag success">已达成</span>' : rate >= 85 ? '<span class="status-tag warning">接近达成</span>' : '<span class="status-tag danger">未达成</span>';
+          var diffColor = diff > 0 ? '#f5222d' : '#52c41a';
+          var barColor = rate >= 100 ? '#52c41a' : rate >= 85 ? '#faad14' : '#f5222d';
+          var tagCls = k === '商保' ? 'dept-shangbao' : 'dept-jingji';
+          return '<tr><td><span class="type-tag ' + tagCls + '">' + k + '</span></td><td>' + o.t.toFixed(1) + '</td><td>' + o.a.toFixed(1) + '</td><td style="color:' + diffColor + '">' + diff + '</td><td><div class="rate-bar-wrap"><div class="rate-bar"><div class="rate-fill" style="width:' + Math.min(rate,100) + '%;background:' + barColor + '"></div></div><span style="color:' + barColor + ';font-weight:500;font-size:12px;min-width:55px">' + rate.toFixed(1) + '%</span></div></td>';
+        }).join('');
+      } else if (currentTab === 'product') {
+        headers = '<tr><th>产品类型</th><th>指标金额(万)</th><th>完成金额(万)</th><th>差额(万)</th><th>达成率</th></tr>';
+        var g = {};
+        filteredData.forEach(function(d) {
+          if (!g[d.product]) g[d.product] = {t:0, a:0, c:0};
+          g[d.product].t += d.target;
+          g[d.product].a += d.actual;
+          g[d.product].c++;
+        });
+        rows = Object.keys(g).map(function(k) {
+          var o = g[k];
+          var rate = o.t > 0 ? (o.a / o.t * 100) : 0;
+          rate = +rate.toFixed(1);
+          var diff = +(o.t - o.a).toFixed(1);
+          var status = rate >= 100 ? '<span class="status-tag success">已达成</span>' : rate >= 85 ? '<span class="status-tag warning">接近达成</span>' : '<span class="status-tag danger">未达成</span>';
+          var diffColor = diff > 0 ? '#f5222d' : '#52c41a';
+          var barColor = rate >= 100 ? '#52c41a' : rate >= 85 ? '#faad14' : '#f5222d';
+          return '<tr><td><span class="type-tag product">' + k + '</span></td><td>' + o.t.toFixed(1) + '</td><td>' + o.a.toFixed(1) + '</td><td style="color:' + diffColor + '">' + diff + '</td><td><div class="rate-bar-wrap"><div class="rate-bar"><div class="rate-fill" style="width:' + Math.min(rate,100) + '%;background:' + barColor + '"></div></div><span style="color:' + barColor + ';font-weight:500;font-size:12px;min-width:55px">' + rate.toFixed(1) + '%</span></div></td>';
+        }).join('');
+      } else {
+        headers = '<tr><th>大区</th><th>城市</th><th>指标金额(万)</th><th>完成金额(万)</th><th>差额(万)</th><th>达成率</th></tr>';
+        var g = {};
+        filteredData.forEach(function(d) {
+          var key = d.region + '|' + d.city;
+          if (!g[key]) g[key] = {region: d.region, city: d.city, t:0, a:0};
+          g[key].t += d.target;
+          g[key].a += d.actual;
+        });
+        rows = Object.keys(g).map(function(k) {
+          var o = g[k];
+          var rate = o.t > 0 ? (o.a / o.t * 100) : 0;
+          rate = +rate.toFixed(1);
+          var diff = +(o.t - o.a).toFixed(1);
+          var status = rate >= 100 ? '<span class="status-tag success">已达成</span>' : rate >= 85 ? '<span class="status-tag warning">接近达成</span>' : '<span class="status-tag danger">未达成</span>';
+          var diffColor = diff > 0 ? '#f5222d' : '#52c41a';
+          var barColor = rate >= 100 ? '#52c41a' : rate >= 85 ? '#faad14' : '#f5222d';
+          return '<tr><td>' + o.region + '</td><td>' + o.city + '</td><td>' + o.t.toFixed(1) + '</td><td>' + o.a.toFixed(1) + '</td><td style="color:' + diffColor + '">' + diff + '</td><td><div class="rate-bar-wrap"><div class="rate-bar"><div class="rate-fill" style="width:' + Math.min(rate,100) + '%;background:' + barColor + '"></div></div><span style="color:' + barColor + ';font-weight:500;font-size:12px;min-width:55px">' + rate.toFixed(1) + '%</span></div></td>';
+        }).join('');
+      }
+
+      table.innerHTML = '<thead>' + headers + '</thead><tbody>' + rows + '</tbody>';
+      document.getElementById('tableInfo').textContent = '共 ' + filteredData.length + ' 条';
+    }
+
+    function exportCSV() {
+      var h = ['部门', '月份', '产品类型', '新增/存量', '大区', '城市', '指标(万)', '完成金额(万)', '达成率'];
+      var lines = [h.join(',')];
+      filteredData.forEach(function(d) {
+        var r = d.target > 0 ? (d.actual / d.target * 100).toFixed(1) + '%' : '-';
+        lines.push([d.dept, d.month, d.product, d.type, d.region, d.city, d.target, d.actual, r].join(','));
+      });
+      var csv = '\uFEFF' + lines.join('\n');
+      var blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = '业绩达成_' + new Date().toISOString().slice(0,10) + '.csv';
+      link.click();
+    }
+
+    window.addEventListener('resize', function() {
+      if (chartInst) chartInst.resize();
+      if (chartInst2) chartInst2.resize();
+      if (chartInst3) chartInst3.resize();
     });
 
-    function getSelectedYear() {
-      var ym = document.getElementById('yearMonth').value;
-      return ym ? ym.split('-')[0] : String(new Date().getFullYear());
-    }
-
-    function getYearMonths(year) {
-      var months = [];
-      for (var m = 1; m <= 12; m++) {
-        months.push(year + '-' + String(m).padStart(2, '0'));
-      }
-      return months;
-    }
-
-    function search() {
-      var year = getSelectedYear();
-      updateChartTitle(year);
-      initChart();
-      renderTables();
-      updateKPIs();
-    }
-
-    function resetForm() {
-      var today = new Date();
-      var year = today.getFullYear();
-      var month = String(today.getMonth() + 1).padStart(2, '0');
-      document.getElementById('yearMonth').value = year + '-' + month;
-      document.getElementById('insuranceType').value = '';
-      updateChartTitle(String(year));
-      initChart();
-      renderTables();
-      updateKPIs();
-    }
-
-    function updateChartTitle(year) {
-      document.getElementById('chartTitle').textContent = year + '年每月业绩达成 vs 达成（目标达成率 vs 达成率）';
-    }
-
-    function switchTab(el, tab) {
-      document.querySelectorAll('.tab-item').forEach(function(item) {
-        item.classList.remove('active');
-      });
-      el.classList.add('active');
-      currentTab = tab;
-      renderTables();
-      updateKPIs();
-    }
-
-    function updateKPIs() {
-      var year = getSelectedYear();
-      var today = new Date();
-      var curMonth = Math.min(today.getMonth() + 1, 12);
-      var idx = curMonth - 1;
-      var monthlyPremium = 0, monthlyDone = 0, cumTarget = 0, cumDone = 0;
-      if (currentTab === 'total') {
-        ['new', 'stock'].forEach(function(type) {
-          var data = kpiData[year][type];
-          monthlyPremium += data.monthly[idx];
-          monthlyDone += data.done[idx];
-          for (var i = 0; i <= idx; i++) {
-            cumTarget += data.monthly[i];
-            cumDone += data.done[i];
-          }
-        });
-      } else {
-        var data = kpiData[year][currentTab];
-        monthlyPremium = data.monthly[idx];
-        monthlyDone = data.done[idx];
-        for (var i = 0; i <= idx; i++) {
-          cumTarget += data.monthly[i];
-          cumDone += data.done[i];
-        }
-      }
-      var monthlyRate = (monthlyDone / monthlyPremium * 100).toFixed(1);
-      var cumRate = (cumDone / cumTarget * 100).toFixed(1);
-      document.getElementById('kpiMonthlyPremium').textContent = '¥' + monthlyPremium + '万';
-      document.getElementById('kpiMonthlyDone').textContent = '¥' + monthlyDone + '万';
-      document.getElementById('kpiMonthlyRate').textContent = monthlyRate + '%';
-      document.getElementById('kpiCumTarget').textContent = '¥' + cumTarget.toLocaleString() + '万';
-      document.getElementById('kpiCumDone').textContent = '¥' + cumDone.toLocaleString() + '万';
-      document.getElementById('kpiCumRate').textContent = cumRate + '%';
-    }
-
-    function renderTables() {
-      var year = getSelectedYear();
-      var months = getYearMonths(year);
-      ['new', 'stock'].forEach(function(type) {
-        var data = kpiData[year][type];
-        var cumTarget = 0, cumDone = 0, prevDone = 0;
-        var html = '';
-        for (var i = 0; i < 12; i++) {
-          cumTarget += data.monthly[i];
-          cumDone += data.done[i];
-          var monthRate = (data.done[i] / data.monthly[i] * 100).toFixed(1);
-          var cumRate = (cumDone / cumTarget * 100).toFixed(1);
-          var growth = i === 0 ? '-' : ((data.done[i] - prevDone) / prevDone * 100).toFixed(1);
-          var growthClass = growth === '-' ? '' : (parseFloat(growth) >= 0 ? 'change-positive' : 'change-negative');
-          var growthText = growth === '-' ? '-' : (parseFloat(growth) >= 0 ? '+' + growth + '%' : growth + '%');
-          html += '<tr>';
-          html += '<td>' + months[i] + '</td>';
-          html += '<td>' + data.monthly[i] + '</td>';
-          html += '<td>' + data.done[i] + '</td>';
-          html += '<td>' + monthRate + '%</td>';
-          html += '<td>' + cumTarget.toLocaleString() + '</td>';
-          html += '<td>' + cumDone.toLocaleString() + '</td>';
-          html += '<td>' + cumRate + '%</td>';
-          html += '<td class="' + growthClass + '">' + growthText + '</td>';
-          html += '</tr>';
-          prevDone = data.done[i];
-        }
-        if (type === 'new') {
-          document.getElementById('newBizBody').innerHTML = html;
-        } else {
-          document.getElementById('stockBizBody').innerHTML = html;
-        }
-      });
-    }
-
-    function exportData() {
-      var year = getSelectedYear();
-      var months = getYearMonths(year);
-      var headers = ['月份', '当月指标(万)', '当月达成(万)', '当月达成率', '累计指标(万)', '累计达成(万)', '累计达成率', '环比增长'];
-      var rows = [headers.join(',')];
-      if (currentTab === 'total') {
-        var newD = kpiData[year]['new'], stockD = kpiData[year]['stock'];
-        var cumTarget = 0, cumDone = 0, prevDone = 0;
-        for (var i = 0; i < 12; i++) {
-          var totalMonthly = newD.monthly[i] + stockD.monthly[i];
-          var totalDone = newD.done[i] + stockD.done[i];
-          cumTarget += totalMonthly;
-          cumDone += totalDone;
-          var monthRate = (totalDone / totalMonthly * 100).toFixed(1) + '%';
-          var cumRate = (cumDone / cumTarget * 100).toFixed(1) + '%';
-          var growth = i === 0 ? '-' : ((totalDone - prevDone) / prevDone * 100).toFixed(1) + '%';
-          rows.push([months[i], totalMonthly, totalDone, monthRate, cumTarget, cumDone, cumRate, growth].join(','));
-          prevDone = totalDone;
-        }
-      } else {
-        var data = kpiData[year][currentTab];
-        var cumTarget = 0, cumDone = 0, prevDone = 0;
-        for (var i = 0; i < 12; i++) {
-          cumTarget += data.monthly[i];
-          cumDone += data.done[i];
-          var monthRate = (data.done[i] / data.monthly[i] * 100).toFixed(1) + '%';
-          var cumRate = (cumDone / cumTarget * 100).toFixed(1) + '%';
-          var growth = i === 0 ? '-' : ((data.done[i] - prevDone) / prevDone * 100).toFixed(1) + '%';
-          rows.push([months[i], data.monthly[i], data.done[i], monthRate, cumTarget, cumDone, cumRate, growth].join(','));
-          prevDone = data.done[i];
-        }
-      }
-      var csvContent = '\uFEFF' + rows.join('\n');
-      var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      var link = document.createElement('a');
-      link.setAttribute('href', URL.createObjectURL(blob));
-      link.setAttribute('download', '业绩明细_' + year + '.csv');
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    function initChart() {
-      var year = getSelectedYear();
-      var months = getYearMonths(year);
-      var targetRates = [], actualRates = [];
-      if (currentTab === 'total') {
-        var newD = kpiData[year]['new'], stockD = kpiData[year]['stock'];
-        for (var i = 0; i < 12; i++) {
-          var totalMonthly = newD.monthly[i] + stockD.monthly[i];
-          var totalDone = newD.done[i] + stockD.done[i];
-          targetRates.push(100);
-          actualRates.push(parseFloat((totalDone / totalMonthly * 100).toFixed(1)));
-        }
-      } else {
-        var data = kpiData[year][currentTab];
-        for (var i = 0; i < 12; i++) {
-          targetRates.push(100);
-          actualRates.push(parseFloat((data.done[i] / data.monthly[i] * 100).toFixed(1)));
-        }
-      }
-      if (chartInstance) {
-        chartInstance.dispose();
-      }
-      chartInstance = echarts.init(document.getElementById('performanceChart'));
-      chartInstance.setOption({
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'shadow' },
-          formatter: function(params) {
-            var result = params[0].axisValueLabel + '<br/>';
-            params.forEach(function(item) {
-              result += item.marker + item.seriesName + ': ' + item.value + '%<br/>';
-            });
-            return result;
-          }
-        },
-        legend: {
-          data: ['目标达成率', '达成率'],
-          bottom: 0
-        },
-        grid: { top: 20, right: 20, bottom: 50, left: 50 },
-        xAxis: {
-          type: 'category',
-          data: months,
-          axisLine: { lineStyle: { color: '#e8e8e8' } },
-          axisLabel: { color: '#999', fontSize: 12 }
-        },
-        yAxis: {
-          type: 'value',
-          name: '%',
-          nameTextStyle: { color: '#999', fontSize: 12, padding: [0, 30, 0, 0] },
-          axisLine: { show: false },
-          axisLabel: { color: '#999', fontSize: 12, formatter: '{value}%' },
-          splitLine: { lineStyle: { color: '#f0f0f0' } }
-        },
-        series: [
-          {
-            name: '目标达成率',
-            type: 'bar',
-            data: targetRates,
-            itemStyle: { color: '#e8e8e8' },
-            barWidth: '35%'
-          },
-          {
-            name: '达成率',
-            type: 'bar',
-            data: actualRates,
-            itemStyle: { color: '#52c41a' },
-            barWidth: '35%'
-          }
-        ]
-      });
-      window.addEventListener('resize', function() {
-        chartInstance.resize();
-      });
-    }
+    renderAll();
   </script>
 </body>
 </html>

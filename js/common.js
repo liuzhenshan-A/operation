@@ -4,7 +4,8 @@ const menuConfig = [
   { id: "premium", name: "保费概况", icon: "💰", page: "premium.html" },
   { id: "claims", name: "补医理赔", icon: "📋", page: "claims.html" },
   { id: "employer-claims", name: "雇主理赔", icon: "🏢", page: "employer-claims.html" },
-  { id: "renewal", name: "续签情况", icon: "🔄", page: "renewal.html" },
+  { id: "renewal", name: "续签汇总", icon: "🔄", page: "renewal.html" },
+  { id: "renewal-data", name: "续签指标", icon: "📊", page: "renewal-data.html" },
   { id: "performance", name: "业绩达成", icon: "📈", page: "performance.html" },
 ];
 

@@ -30,29 +30,39 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','P
 .toolbar{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;flex-wrap:wrap;gap:12px}
 .toolbar .filter-group{display:flex;align-items:center;gap:6px}
 .toolbar label{color:#666;font-size:13px;white-space:nowrap}
-.toolbar select,.toolbar input{height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 30px 0 10px;font-size:13px;color:#333;background:#fff;appearance:none;cursor:pointer;min-width:110px}
-.toolbar .btn{height:32px;padding:0 16px;border-radius:4px;font-size:13px;cursor:pointer;border:1px solid #d9d9d9;background:#fff;color:#333}
+.toolbar select,.toolbar input{height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 30px 0 10px;font-size:13px;color:#333;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 4l3 3 3-3' fill='none' stroke='%23999' stroke-width='1.2'/%3E%3C/svg%3E") no-repeat right 10px center;appearance:none;cursor:pointer;min-width:110px}
+.toolbar .btn{height:32px;padding:0 16px;border-radius:4px;font-size:13px;cursor:pointer;border:1px solid #d9d9d9;background:#fff;color:#333;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
 .toolbar .btn:hover{border-color:#1890ff;color:#1890ff}
 .toolbar .btn.primary{background:#1890ff;border-color:#1890ff;color:#fff}
 .toolbar .btn.primary:hover{background:#40a9ff}
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
-.kpi-card{background:#fff;border-radius:6px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);border-left:3px solid #1890ff}
+.kpi-card{background:#fff;border-radius:6px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);border-left:3px solid #1890ff;transition:transform .2s,box-shadow .2s}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .kpi-card .kpi-label{font-size:13px;color:#8c8c8c;margin-bottom:8px}
 .kpi-card .kpi-value{font-size:26px;font-weight:600;color:#333;margin-bottom:4px}
 .kpi-card .kpi-sub{font-size:12px;color:#8c8c8c}
+.kpi-card .kpi-sub .up{color:#f5222d}
+.kpi-card .kpi-sub .down{color:#52c41a}
 .kpi-card.success{border-left-color:#52c41a}
 .kpi-card.warning{border-left-color:#faad14}
+.kpi-card.danger{border-left-color:#ff4d4f}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{background:#fafafa;padding:12px 16px;text-align:left;font-weight:500;color:#333;border-bottom:1px solid #f0f0f0;white-space:nowrap}
 tbody td{padding:12px 16px;border-bottom:1px solid #f0f0f0;white-space:nowrap;color:#333}
 tbody tr:hover{background:#f5faff}
 tbody tr:last-child td{border-bottom:none}
+tbody tr.danger-row{background:#fff1f0}
+tbody tr.danger-row:hover{background:#ffccc7}
+tbody tr.reminder-row{background:#fffbe6}
+tbody tr.reminder-row:hover{background:#fff1b8}
 .tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;line-height:18px}
 .tag.green{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
 .tag.orange{background:#fff7e6;color:#fa8c16;border:1px solid #ffd591}
 .tag.blue{background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff}
+.tag.red{background:#fff1f0;color:#ff4d4f;border:1px solid #ffa39e}
 .tag.gray{background:#f5f5f5;color:#8c8c8c;border:1px solid #d9d9d9}
+.tag.purple{background:#f9f0ff;color:#722ed1;border:1px solid #d3adf7}
 .dept-tag{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;line-height:18px;font-weight:500}
 .dept-tag.shangbao{background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff}
 .dept-tag.jingji{background:#f9f0ff;color:#722ed1;border:1px solid #d3adf7}
@@ -64,9 +74,10 @@ tbody tr:last-child td{border-bottom:none}
 .rate-text{font-size:12px;font-weight:500}
 .rate-text.success{color:#52c41a}
 .rate-text.danger{color:#ff4d4f}
-.op-btn{color:#1890ff;cursor:pointer;margin-right:8px;font-size:12px;background:none;border:none;padding:0}
-.op-btn:hover{text-decoration:underline}
+.op-btn{color:#1890ff;cursor:pointer;margin-right:12px;font-size:13px;background:none;border:none;padding:0;transition:color .15s}
+.op-btn:hover{color:#40a9ff}
 .op-btn.danger{color:#ff4d4f}
+.op-btn.danger:hover{color:#ff7875}
 .pagination{padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
 .pagination-info{color:#666;font-size:13px}
 .pagination-controls{display:flex;align-items:center;gap:4px}
@@ -74,24 +85,42 @@ tbody tr:last-child td{border-bottom:none}
 .pagination-controls .page-btn:hover:not(:disabled){border-color:#1890ff;color:#1890ff}
 .pagination-controls .page-btn.active{background:#1890ff;border-color:#1890ff;color:#fff}
 .pagination-controls .page-btn:disabled{color:#bfbfbf;cursor:not-allowed;background:#f5f5f5}
-.modal-mask{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center}
-.modal-mask.show{display:flex}
-.modal{background:#fff;border-radius:6px;width:560px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:6px;width:600px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 6px 30px rgba(0,0,0,.2)}
 .modal-lg{width:720px}
-.modal-header{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-size:16px;font-weight:500;color:#333}
-.modal-close{cursor:pointer;font-size:18px;color:#999;background:none;border:none}
-.modal-body{padding:20px;flex:1;overflow:auto}
-.modal-footer{padding:12px 20px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:8px}
+.modal-header{padding:16px 24px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:600}
+.modal-close{cursor:pointer;color:#999;font-size:18px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:none;background:none}
+.modal-close:hover{color:#333}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-footer{padding:12px 24px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:8px}
 .modal-tip{background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;padding:12px;color:#8c6d1f;font-size:12px;margin-bottom:16px;line-height:1.6}
 .modal-tip a{color:#1890ff;cursor:pointer;text-decoration:underline}
-.upload-area{border:2px dashed #d9d9d9;border-radius:6px;padding:30px;text-align:center;cursor:pointer;transition:border-color .2s}
-.upload-area:hover{border-color:#1890ff}
-.upload-area .upload-icon{font-size:36px;color:#1890ff;margin-bottom:8px}
-.upload-area .upload-text{color:#666;font-size:13px;margin-bottom:4px}
-.upload-area .upload-hint{color:#999;font-size:12px}
+.upload-area{border:2px dashed #d9d9d9;border-radius:6px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .15s;color:#666}
+.upload-area:hover,.upload-area.dragover{border-color:#1890ff;background:#e6f7ff;color:#1890ff}
+.upload-area .upload-icon{font-size:36px;margin-bottom:8px}
+.upload-area .upload-text{font-size:14px}
+.upload-area .upload-sub{color:#999;font-size:12px;margin-top:4px}
 .upload-area.has-file{border-color:#52c41a;background:#f6ffed}
 .upload-area .file-name{color:#52c41a;font-size:13px}
+.template-download{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:4px;color:#52c41a;font-size:13px;margin-bottom:16px;cursor:pointer}
+.template-download:hover{background:#eaffdb}
+.template-download .download-icon{font-size:18px}
+.warning-banner{background:#fff1f0;border:1px solid #ffa39e;border-radius:4px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:#cf1322;font-size:13px}
+.warning-banner .warn-icon{font-size:20px}
+.warning-banner .warn-count{font-weight:600;color:#ff4d4f}
+.reminder-banner{background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:#d48806;font-size:13px}
+.reminder-banner .reminder-icon{font-size:20px}
+.tab-switch{display:flex;gap:0;border-bottom:2px solid #f0f0f0;margin-bottom:0}
+.tab-switch .tab-item{padding:10px 20px;cursor:pointer;font-size:13px;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab-switch .tab-item:hover{color:#1890ff}
+.tab-switch .tab-item.active{color:#1890ff;border-bottom-color:#1890ff;font-weight:500}
+.compare-bar{display:inline-flex;gap:0;font-size:12px;align-items:center}
+.compare-bar .bar-label{color:#999;margin-right:6px}
+.compare-bar .bar-val{font-weight:500;color:#333}
+.compare-bar .bar-sep{color:#ccc;margin:0 4px}
+.compare-bar .bar-done{color:#52c41a}
+.compare-bar .bar-miss{color:#ff4d4f}
 .detail-row{display:flex;margin-bottom:12px;border-bottom:1px dashed #f0f0f0;padding-bottom:8px}
 .detail-row .detail-label{width:120px;color:#8c8c8c;font-size:13px;flex-shrink:0}
 .detail-row .detail-value{flex:1;color:#333;font-size:13px}
@@ -104,6 +133,11 @@ tbody tr:last-child td{border-bottom:none}
 .confirm-icon .icon{width:48px;height:48px;border-radius:50%;background:#fff1f0;color:#ff4d4f;font-size:24px;display:inline-flex;align-items:center;justify-content:center}
 .confirm-text{text-align:center;font-size:15px;font-weight:500;margin-bottom:8px}
 .confirm-sub{text-align:center;color:#666;font-size:13px;margin-bottom:20px}
+.help-tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:#e8e8e8;color:#888;font-size:11px;font-weight:700;cursor:help;position:relative;vertical-align:middle;margin-left:5px;flex-shrink:0}
+.help-tip:hover{background:#1890ff;color:#fff}
+.help-tip::before{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 12px;border-radius:4px;font-size:12px;font-weight:400;line-height:1.6;white-space:normal;width:max-content;max-width:280px;text-align:left;opacity:0;visibility:hidden;transition:all .2s;z-index:9999;pointer-events:none}
+.help-tip::after{content:'';position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:rgba(0,0,0,.85);opacity:0;visibility:hidden;transition:all .2s;z-index:9999;pointer-events:none}
+.help-tip:hover::before,.help-tip:hover::after{opacity:1;visibility:visible}
 </style>
 </head>
 <body>
@@ -121,7 +155,7 @@ tbody tr:last-child td{border-bottom:none}
       <div class="menu-item">理赔管理</div>
       <div class="menu-item" style="background:rgba(255,255,255,.04);font-weight:500">销售管理</div>
       <div class="sub-menu">
-        <div class="sub-item" onclick="location.href='performance.html'">业绩管理</div>
+        <div class="sub-item">业绩管理</div>
         <div class="sub-item active">业绩目标管理</div>
         <div class="sub-item" onclick="location.href='renewal-target.html'">续签指标管理</div>
         <div class="sub-item">提成管理</div>
@@ -138,10 +172,10 @@ tbody tr:last-child td{border-bottom:none}
     <div class="content">
       <div class="page-title">业绩目标管理</div>
       <div class="kpi-row">
-        <div class="kpi-card"><div class="kpi-label">总目标（万元）</div><div class="kpi-value">3,200</div><div class="kpi-sub">全年累计</div></div>
-        <div class="kpi-card success"><div class="kpi-label">已完成（万元）</div><div class="kpi-value">2,180</div><div class="kpi-sub">完成率 68.1%</div></div>
-        <div class="kpi-card warning"><div class="kpi-label">差额（万元）</div><div class="kpi-value">1,020</div><div class="kpi-sub">距年底还需完成</div></div>
-        <div class="kpi-card"><div class="kpi-label">本月目标（万元）</div><div class="kpi-value">280</div><div class="kpi-sub">本月完成 196</div></div>
+        <div class="kpi-card"><div class="kpi-label">总目标（万元）<span class="help-tip" data-tip="所有业绩记录的指标金额之和（万元），反映全年业绩目标总额">?</span></div><div class="kpi-value">3,200</div><div class="kpi-sub">全年累计</div></div>
+        <div class="kpi-card success"><div class="kpi-label">已完成（万元）<span class="help-tip" data-tip="所有业绩记录的完成金额之和（万元），完成率=已完成/总目标×100%">?</span></div><div class="kpi-value">2,180</div><div class="kpi-sub">完成率 68.1%</div></div>
+        <div class="kpi-card warning"><div class="kpi-label">差额（万元）<span class="help-tip" data-tip="总目标 - 已完成金额（万元），表示距全年目标还需完成的业绩">?</span></div><div class="kpi-value">1,020</div><div class="kpi-sub">距年底还需完成</div></div>
+        <div class="kpi-card"><div class="kpi-label">本月目标（万元）<span class="help-tip" data-tip="当前月份的业绩指标金额，子文字展示本月实际完成金额">?</span></div><div class="kpi-value">280</div><div class="kpi-sub">本月完成 196</div></div>
       </div>
       <div class="card">
         <div class="toolbar">
@@ -166,15 +200,15 @@ tbody tr:last-child td{border-bottom:none}
           <button class="btn primary" onclick="doSearch()">🔍 查询</button>
           <button class="btn" onclick="doReset()">重置</button>
         </div>
-        <div class="toolbar" style="border-bottom:none;padding-top:0">
+        <div class="toolbar" style="border-bottom:1px solid #f0f0f0">
           <button class="btn primary" onclick="openAddModal()">+ 新增业绩</button>
           <button class="btn" onclick="openModal('target')">📥 导入业绩指标</button>
           <button class="btn" onclick="openModal('complete')">📥 导入完成业绩</button>
-          <button class="btn" onclick="openModal('log')">📥 导入日志</button>
+          <button class="btn" onclick="openLogModal()">� 导入记录</button>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>序号</th><th>部门</th><th>月份</th><th>产品类型</th><th>新增/存量</th><th>大区</th><th>城市</th><th>指标(万)</th><th>完成金额(万)</th><th>达成率</th><th>完成率</th><th>操作</th></tr></thead>
+            <thead><tr><th>序号</th><th>部门</th><th>月份</th><th>产品类型</th><th>新增/存量</th><th>大区</th><th>城市</th><th>指标(万)</th><th>完成金额(万)</th><th>达成率<span class="help-tip" data-tip="(完成金额 - 指标) ÷ 指标 × 100%。正值表示超额完成，负值表示未达标">?</span></th><th>完成率<span class="help-tip" data-tip="完成金额 ÷ 指标 × 100%，以进度条展示。绿色≥100%，红色＜100%">?</span></th><th>操作</th></tr></thead>
             <tbody id="tableBody"></tbody>
           </table>
         </div>
@@ -187,7 +221,7 @@ tbody tr:last-child td{border-bottom:none}
   </main>
 </div>
 
-<div class="modal-mask" id="importModal">
+<div class="modal-mask" id="importModal" style="display:none">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title" id="importModalTitle">导入业绩指标</span>
@@ -212,7 +246,7 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<div class="modal-mask" id="detailModal">
+<div class="modal-mask" id="detailModal" style="display:none">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">业绩详情</span>
@@ -225,7 +259,7 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<div class="modal-mask" id="editModal">
+<div class="modal-mask" id="editModal" style="display:none">
   <div class="modal modal-lg">
     <div class="modal-header">
       <span class="modal-title" id="editModalTitle">编辑业绩</span>
@@ -239,7 +273,7 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<div class="modal-mask" id="confirmModal">
+<div class="modal-mask" id="confirmModal" style="display:none">
   <div class="modal" style="width:400px">
     <div class="modal-header">
       <span class="modal-title">删除确认</span>
@@ -257,7 +291,43 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<div class="modal-mask" id="addModal">
+<div class="modal-mask" id="logModal" style="display:none">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">导入记录</span>
+      <button class="modal-close" onclick="closeModal('logModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tip" style="background:#e6f7ff;border-color:#91d5ff;color:#003a8c">
+        系统自动记录每次"导入业绩指标"和"导入完成业绩"的操作，便于追溯与核对。点击"查看明细"可查看本次导入的具体数据。
+      </div>
+      <div class="table-wrap" style="max-height:420px;overflow:auto;border:1px solid #f0f0f0;border-radius:4px">
+        <table>
+          <thead><tr><th>序号</th><th>操作类型</th><th>操作时间</th><th>操作人</th><th>文件名</th><th>总条数</th><th>成功/失败</th><th>耗时</th><th>结果</th><th>操作</th></tr></thead>
+          <tbody id="logTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('logModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="logDetailModal" style="display:none">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="logDetailTitle">导入明细</span>
+      <button class="modal-close" onclick="closeModal('logDetailModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="logDetailBody"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('logDetailModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="addModal" style="display:none">
   <div class="modal modal-lg">
     <div class="modal-header">
       <span class="modal-title">新增业绩</span>
@@ -302,6 +372,66 @@ let importType = '';
 let editingId = null;
 let deleteId = null;
 
+// 系统记录的导入操作日志（导入业绩指标、导入完成业绩时自动生成）
+let importLogs = [
+  {
+    id:1, type:'导入业绩指标', time:'2026-01-15 10:32:18', operator:'张敏',
+    file:'业绩指标导入_202601.xlsx', total:20, success:20, fail:0, cost:'2.3s',
+    result:'成功', detail:'共导入 20 条业绩指标数据',
+    records:[
+      {dept:'商保', month:'2026年1月', product:'补充医疗', bizType:'新增', region:'北京', city:'北京', value:'680.0', status:'成功'},
+      {dept:'商保', month:'2026年1月', product:'雇主', bizType:'新增', region:'上海', city:'上海', value:'420.0', status:'成功'},
+      {dept:'商保', month:'2026年1月', product:'经纪自拓', bizType:'存量', region:'广州', city:'广州', value:'350.0', status:'成功'},
+      {dept:'经纪', month:'2026年1月', product:'补充医疗', bizType:'新增', region:'北京', city:'北京', value:'500.0', status:'成功'},
+      {dept:'经纪', month:'2026年1月', product:'经纪自拓', bizType:'新增', region:'上海', city:'上海', value:'280.0', status:'成功'}
+    ]
+  },
+  {
+    id:2, type:'导入完成业绩', time:'2026-02-03 14:20:05', operator:'李强',
+    file:'完成业绩_1月.xlsx', total:18, success:18, fail:0, cost:'1.8s',
+    result:'成功', detail:'共更新 18 条完成金额数据',
+    records:[
+      {dept:'商保', month:'2026年1月', product:'补充医疗', region:'北京', city:'北京', value:'680.9', status:'成功'},
+      {dept:'商保', month:'2026年1月', product:'雇主', region:'上海', city:'上海', value:'415.6', status:'成功'},
+      {dept:'经纪', month:'2026年1月', product:'补充医疗', region:'北京', city:'北京', value:'498.2', status:'成功'},
+      {dept:'经纪', month:'2026年1月', product:'经纪自拓', region:'上海', city:'上海', value:'275.3', status:'成功'}
+    ]
+  },
+  {
+    id:3, type:'导入完成业绩', time:'2026-02-10 09:15:42', operator:'王芳',
+    file:'完成业绩_2月.xlsx', total:15, success:13, fail:2, cost:'2.1s',
+    result:'部分失败', detail:'共 15 条，成功 13 条，失败 2 条（月份格式错误）',
+    records:[
+      {dept:'商保', month:'2026年2月', product:'补充医疗', region:'北京', city:'北京', value:'520.0', status:'成功'},
+      {dept:'商保', month:'2026年2月', product:'BBC', region:'深圳', city:'深圳', value:'180.5', status:'成功'},
+      {dept:'商保', month:'20262月', product:'雇主', region:'上海', city:'上海', value:'300.0', status:'失败', reason:'月份格式错误'},
+      {dept:'经纪', month:'2026年2月', product:'经纪自拓', region:'广州', city:'广州', value:'260.0', status:'成功'},
+      {dept:'经纪', month:'20262月', product:'补充医疗', region:'杭州', city:'杭州', value:'310.0', status:'失败', reason:'月份格式错误'}
+    ]
+  },
+  {
+    id:4, type:'导入业绩指标', time:'2026-03-01 11:08:30', operator:'张敏',
+    file:'Q1业绩指标.xlsx', total:24, success:24, fail:0, cost:'2.8s',
+    result:'成功', detail:'共导入 24 条业绩指标数据',
+    records:[
+      {dept:'商保', month:'2026年3月', product:'团险外投', bizType:'新增', region:'成都', city:'成都', value:'260.0', status:'成功'},
+      {dept:'商保', month:'2026年3月', product:'经纪自拓', bizType:'存量', region:'广州', city:'广州', value:'180.0', status:'成功'},
+      {dept:'经纪', month:'2026年3月', product:'商保代开', bizType:'存量', region:'上海', city:'上海', value:'420.0', status:'成功'},
+      {dept:'经纪', month:'2026年3月', product:'经纪自拓', bizType:'新增', region:'杭州', city:'杭州', value:'350.0', status:'成功'}
+    ]
+  },
+  {
+    id:5, type:'导入完成业绩', time:'2026-04-02 16:45:12', operator:'刘伟',
+    file:'完成业绩_3月.xlsx', total:22, success:22, fail:0, cost:'2.0s',
+    result:'成功', detail:'共更新 22 条完成金额数据',
+    records:[
+      {dept:'商保', month:'2026年3月', product:'团险外投', region:'成都', city:'成都', value:'255.8', status:'成功'},
+      {dept:'经纪', month:'2026年3月', product:'商保代开', region:'上海', city:'上海', value:'418.6', status:'成功'},
+      {dept:'经纪', month:'2026年3月', product:'经纪自拓', region:'杭州', city:'杭州', value:'345.2', status:'成功'}
+    ]
+  }
+];
+
 function calcRate(row) {
   if (row.target === 0 || row.actual === null || row.actual === undefined) return null;
   return ((row.actual - row.target) / row.target * 100).toFixed(2);
@@ -338,7 +468,6 @@ function renderTable() {
         <td>
           <button class="op-btn" onclick="viewDetail(${row.id})">查看</button>
           <button class="op-btn" onclick="editRow(${row.id})">编辑</button>
-          <button class="op-btn danger" onclick="deleteRow(${row.id})">删除</button>
         </td>
       </tr>`;
     }).join('');
@@ -522,14 +651,12 @@ function saveAdd() {
 }
 
 function openModal(type) {
-  const modal = type === 'target' || type === 'complete' || type === 'log' ? 'importModal' : type;
-  if (type === 'target' || type === 'complete' || type === 'log') {
+  if (type === 'target' || type === 'complete') {
     importType = type;
-    const titles = {'target':'导入业绩指标','complete':'导入完成业绩','log':'导入日志'};
+    const titles = {'target':'导入业绩指标','complete':'导入完成业绩'};
     const tips = {
       'target':'<strong>填写说明：</strong>部门（商保/经纪）| 月份格式（2026年1月）| 产品类型（补充医疗/雇主/经纪自拓/商保代开/团险外投/BBC）| 新增/存量（新增/存量）<br/><a onclick="downloadTemplate()">📥 下载导入模板</a>',
-      'complete':'<strong>填写说明：</strong>部门（商保/经纪）| 月份格式（2026年1月）| 产品类型（补充医疗/雇主/经纪自拓/商保代开/团险外投/BBC）| 完成金额(万元)<br/><a onclick="downloadTemplate()">📥 下载导入模板</a>',
-      'log':'<strong>填写说明：</strong>操作类型|操作时间|操作人|操作详情<br/><a onclick="downloadTemplate()">📥 下载导入模板</a>'
+      'complete':'<strong>填写说明：</strong>部门（商保/经纪）| 月份格式（2026年1月）| 产品类型（补充医疗/雇主/经纪自拓/商保代开/团险外投/BBC）| 完成金额(万元)<br/><a onclick="downloadTemplate()">📥 下载导入模板</a>'
     };
     document.getElementById('importModalTitle').textContent = titles[type];
     document.getElementById('importTip').innerHTML = tips[type];
@@ -537,14 +664,106 @@ function openModal(type) {
     const area = document.getElementById('uploadArea');
     area.classList.remove('has-file');
     area.innerHTML = '<div class="upload-icon">📁</div><div class="upload-text">点击上传文件 或 拖拽文件到此处</div><div class="upload-hint">支持 .xlsx / .xls 格式文件，文件大小不超过 5MB</div>';
-    document.getElementById('importModal').classList.add('show');
+    document.getElementById('importModal').style.display = 'flex';
   } else {
-    document.getElementById(type).classList.add('show');
+    document.getElementById(type).style.display = 'flex';
   }
 }
 
+function openLogModal() {
+  const tbody = document.getElementById('logTableBody');
+  if (importLogs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#999;padding:40px">暂无导入记录</td></tr>';
+  } else {
+    tbody.innerHTML = importLogs.slice().reverse().map(log => {
+      const resultClass = log.result === '成功' ? 'green' : (log.result === '部分失败' ? 'orange' : 'red');
+      const typeClass = log.type === '导入业绩指标' ? 'blue' : 'green';
+      const successFail = `<span style="color:#52c41a">${log.success}</span> / <span style="color:${log.fail>0?'#ff4d4f':'#999'}">${log.fail}</span>`;
+      return `<tr>
+        <td>${log.id}</td>
+        <td><span class="tag ${typeClass}">${log.type}</span></td>
+        <td>${log.time}</td>
+        <td>${log.operator}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis" title="${log.file}">${log.file}</td>
+        <td>${log.total}</td>
+        <td>${successFail}</td>
+        <td>${log.cost}</td>
+        <td><span class="tag ${resultClass}">${log.result}</span></td>
+        <td><button class="op-btn" onclick="viewLogDetail(${log.id})">查看明细</button></td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('logModal').style.display = 'flex';
+}
+
+function viewLogDetail(id) {
+  const log = importLogs.find(l => l.id === id);
+  if (!log) return;
+  const isTarget = log.type === '导入业绩指标';
+  document.getElementById('logDetailTitle').textContent = `${log.type}明细 - ${log.file}`;
+
+  const resultClass = log.result === '成功' ? 'green' : (log.result === '部分失败' ? 'orange' : 'red');
+  const typeClass = isTarget ? 'blue' : 'green';
+
+  let html = `
+    <div style="background:#fafafa;border-radius:4px;padding:16px;margin-bottom:16px">
+      <div class="detail-row"><div class="detail-label">操作类型</div><div class="detail-value"><span class="tag ${typeClass}">${log.type}</span></div></div>
+      <div class="detail-row"><div class="detail-label">操作时间</div><div class="detail-value">${log.time}</div></div>
+      <div class="detail-row"><div class="detail-label">操作人</div><div class="detail-value">${log.operator}</div></div>
+      <div class="detail-row"><div class="detail-label">文件名</div><div class="detail-value">${log.file}</div></div>
+      <div class="detail-row"><div class="detail-label">总条数</div><div class="detail-value">${log.total} 条</div></div>
+      <div class="detail-row"><div class="detail-label">成功 / 失败</div><div class="detail-value"><span style="color:#52c41a;font-weight:500">${log.success} 成功</span> / <span style="color:${log.fail>0?'#ff4d4f':'#999'};font-weight:500">${log.fail} 失败</span></div></div>
+      <div class="detail-row"><div class="detail-label">耗时</div><div class="detail-value">${log.cost}</div></div>
+      <div class="detail-row"><div class="detail-label">结果</div><div class="detail-value"><span class="tag ${resultClass}">${log.result}</span></div></div>
+      <div class="detail-row" style="border-bottom:none"><div class="detail-label">说明</div><div class="detail-value">${log.detail}</div></div>
+    </div>
+    <div style="font-size:14px;font-weight:500;margin-bottom:10px">导入数据明细（${log.records.length} 条${log.records.length < log.total ? '，仅展示前 ' + log.records.length + ' 条' : ''}）</div>
+    <div class="table-wrap" style="border:1px solid #f0f0f0;border-radius:4px">
+      <table>
+  `;
+
+  if (isTarget) {
+    html += `<thead><tr><th>序号</th><th>部门</th><th>月份</th><th>产品类型</th><th>新增/存量</th><th>大区</th><th>城市</th><th>指标(万)</th><th>状态</th><th>失败原因</th></tr></thead><tbody>`;
+    log.records.forEach((r, i) => {
+      const statusClass = r.status === '成功' ? 'green' : 'red';
+      html += `<tr>
+        <td>${i+1}</td>
+        <td><span class="dept-tag ${r.dept==='商保'?'shangbao':'jingji'}">${r.dept}</span></td>
+        <td>${r.month}</td>
+        <td>${r.product}</td>
+        <td>${r.bizType}</td>
+        <td>${r.region}</td>
+        <td>${r.city}</td>
+        <td>${r.value}</td>
+        <td><span class="tag ${statusClass}">${r.status}</span></td>
+        <td style="color:#ff4d4f">${r.reason || '—'}</td>
+      </tr>`;
+    });
+  } else {
+    html += `<thead><tr><th>序号</th><th>部门</th><th>月份</th><th>产品类型</th><th>大区</th><th>城市</th><th>完成金额(万)</th><th>状态</th><th>失败原因</th></tr></thead><tbody>`;
+    log.records.forEach((r, i) => {
+      const statusClass = r.status === '成功' ? 'green' : 'red';
+      html += `<tr>
+        <td>${i+1}</td>
+        <td><span class="dept-tag ${r.dept==='商保'?'shangbao':'jingji'}">${r.dept}</span></td>
+        <td>${r.month}</td>
+        <td>${r.product}</td>
+        <td>${r.region}</td>
+        <td>${r.city}</td>
+        <td>${r.value}</td>
+        <td><span class="tag ${statusClass}">${r.status}</span></td>
+        <td style="color:#ff4d4f">${r.reason || '—'}</td>
+      </tr>`;
+    });
+  }
+  html += `</tbody></table></div>`;
+
+  document.getElementById('logDetailBody').innerHTML = html;
+  document.getElementById('logDetailModal').style.display = 'flex';
+}
+
 function closeModal(type) {
-  document.getElementById(type).classList.remove('show');
+  document.getElementById(type).style.display = 'none';
 }
 
 function handleFile(input) {
@@ -568,9 +787,7 @@ function downloadTemplate() {
     sample = [['商保','2026年1月','补充医疗','北京','北京',680.9]];
     filename = '完成业绩导入模板.csv';
   } else {
-    headers = ['操作类型','操作时间','操作人','操作详情'];
-    sample = [['新增','2026-01-15 10:30','张三','新增2026年1月商保补充医疗指标680万']];
-    filename = '日志导入模板.csv';
+    return;
   }
   
   let csv = '\ufeff' + headers.join(',') + '\n';
@@ -588,11 +805,58 @@ function downloadTemplate() {
 }
 
 function confirmImport() {
-  if (!document.getElementById('fileInput').files.length) {
+  const fileInput = document.getElementById('fileInput');
+  if (!fileInput.files.length) {
     alert('请先上传文件');
     return;
   }
-  alert('导入成功！');
+  const fileName = fileInput.files[0].name;
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const timeStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const newId = importLogs.length > 0 ? Math.max(...importLogs.map(l => l.id)) + 1 : 1;
+  const importCount = Math.floor(Math.random() * 15) + 8;
+  const cost = (Math.random() * 2 + 1).toFixed(1) + 's';
+  const isTarget = importType === 'target';
+
+  // 模拟本次导入的明细数据
+  const sampleDepts = ['商保','经纪'];
+  const sampleProducts = ['补充医疗','雇主','经纪自拓','商保代开','团险外投','BBC'];
+  const sampleRegions = ['北京','上海','广州','深圳','成都','杭州'];
+  const sampleCities = ['北京','上海','广州','深圳','成都','杭州','天津','济南'];
+  const sampleTypes = ['新增','存量'];
+  const showCount = Math.min(importCount, 5);
+  const records = [];
+  for (let i = 0; i < showCount; i++) {
+    const rec = {
+      dept: sampleDepts[Math.floor(Math.random()*2)],
+      month: `2026年${Math.floor(Math.random()*5)+1}月`,
+      product: sampleProducts[Math.floor(Math.random()*6)],
+      region: sampleRegions[Math.floor(Math.random()*6)],
+      city: sampleCities[Math.floor(Math.random()*8)],
+      value: (Math.random()*500+100).toFixed(1),
+      status: '成功'
+    };
+    if (isTarget) rec.bizType = sampleTypes[Math.floor(Math.random()*2)];
+    records.push(rec);
+  }
+
+  importLogs.push({
+    id: newId,
+    type: isTarget ? '导入业绩指标' : '导入完成业绩',
+    time: timeStr,
+    operator: '当前用户',
+    file: fileName,
+    total: importCount,
+    success: importCount,
+    fail: 0,
+    cost: cost,
+    result: '成功',
+    detail: isTarget ? `共导入 ${importCount} 条业绩指标数据` : `共更新 ${importCount} 条完成金额数据`,
+    records: records
+  });
+
+  alert('导入成功！已记录到导入记录');
   closeModal('importModal');
 }
 

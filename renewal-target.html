@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>续签指标管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;font-size:13px;color:#333;background:#f0f2f5}
+.layout{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:200px;background:#001529;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{height:56px;padding:0 20px;color:#fff;font-size:15px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.sidebar-logo .logo-icon{width:28px;height:28px;background:#1890ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700}
+.sidebar-menu{flex:1;overflow-y:auto;padding:4px 0}
+.sidebar-menu .menu-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:rgba(255,255,255,.65);cursor:pointer;font-size:13px;transition:all .15s;position:relative}
+.sidebar-menu .menu-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.sidebar-menu .menu-item.active{color:#fff;background:#1890ff}
+.sidebar-menu .menu-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#fff}
+.sub-menu{padding:4px 0 6px 0}
+.sub-menu .sub-item{padding:6px 20px 6px 56px;color:rgba(255,255,255,.65);font-size:13px;cursor:pointer;transition:all .15s}
+.sub-menu .sub-item:hover{color:#fff}
+.sub-menu .sub-item.active{color:#fff;background:rgba(24,144,255,.15);font-weight:500;border-left:3px solid #fff}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f0f2f5}
+.header{height:56px;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.breadcrumb{font-size:13px;color:#666}
+.breadcrumb .sep{color:#ccc;margin:0 6px}
+.breadcrumb .current{color:#333;font-weight:500}
+.content{flex:1;overflow:auto;padding:16px}
+.page-title{font-size:16px;font-weight:600;color:#333;margin-bottom:16px}
+.card{background:#fff;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.03);margin-bottom:16px}
+.toolbar{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.toolbar .filter-group{display:flex;align-items:center;gap:6px}
+.toolbar label{color:#666;font-size:13px;white-space:nowrap}
+.toolbar select,.toolbar input{height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 30px 0 10px;font-size:13px;color:#333;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 4l3 3 3-3' fill='none' stroke='%23999' stroke-width='1.2'/%3E%3C/svg%3E") no-repeat right 10px center;appearance:none;cursor:pointer;min-width:110px}
+.toolbar .btn{height:32px;padding:0 16px;border-radius:4px;font-size:13px;cursor:pointer;border:1px solid #d9d9d9;background:#fff;color:#333;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
+.toolbar .btn:hover{border-color:#1890ff;color:#1890ff}
+.toolbar .btn.primary{background:#1890ff;border-color:#1890ff;color:#fff}
+.toolbar .btn.primary:hover{background:#40a9ff;border-color:#40a9ff}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:6px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);border-left:3px solid #1890ff;transition:transform .2s,box-shadow .2s}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.kpi-card .kpi-label{font-size:13px;color:#8c8c8c;margin-bottom:8px}
+.kpi-card .kpi-value{font-size:26px;font-weight:600;color:#333;margin-bottom:4px}
+.kpi-card .kpi-sub{font-size:12px;color:#8c8c8c}
+.kpi-card .kpi-sub .up{color:#f5222d}
+.kpi-card .kpi-sub .down{color:#52c41a}
+.kpi-card.warning{border-left-color:#faad14}
+.kpi-card.danger{border-left-color:#ff4d4f}
+.kpi-card.success{border-left-color:#52c41a}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#fafafa;padding:12px 16px;text-align:left;font-weight:500;color:#333;border-bottom:1px solid #f0f0f0;white-space:nowrap;font-size:13px}
+tbody td{padding:12px 16px;border-bottom:1px solid #f0f0f0;white-space:nowrap;color:#333}
+tbody tr:hover{background:#f5faff}
+tbody tr:last-child td{border-bottom:none}
+tbody tr.danger-row{background:#fff1f0}
+tbody tr.danger-row:hover{background:#ffccc7}
+tbody tr.reminder-row{background:#fffbe6}
+tbody tr.reminder-row:hover{background:#fff1b8}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;line-height:18px}
+.tag.green{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
+.tag.orange{background:#fff7e6;color:#fa8c16;border:1px solid #ffd591}
+.tag.red{background:#fff1f0;color:#ff4d4f;border:1px solid #ffa39e}
+.tag.blue{background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff}
+.tag.gray{background:#f5f5f5;color:#8c8c8c;border:1px solid #d9d9d9}
+.tag.purple{background:#f9f0ff;color:#722ed1;border:1px solid #d3adf7}
+.action-link{color:#1890ff;cursor:pointer;font-size:13px;margin-right:12px}
+.action-link:hover{color:#40a9ff}
+.action-link.danger{color:#ff4d4f}
+.action-link.danger:hover{color:#ff7875}
+.pagination{padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.pagination-info{color:#666;font-size:13px}
+.pagination-controls{display:flex;align-items:center;gap:4px}
+.pagination-controls .page-btn{min-width:32px;height:32px;border:1px solid #d9d9d9;background:#fff;border-radius:4px;font-size:13px;cursor:pointer;color:#333;display:inline-flex;align-items:center;justify-content:center;padding:0 8px}
+.pagination-controls .page-btn:hover:not(:disabled){border-color:#1890ff;color:#1890ff}
+.pagination-controls .page-btn.active{background:#1890ff;border-color:#1890ff;color:#fff}
+.pagination-controls .page-btn:disabled{color:#bfbfbf;cursor:not-allowed;background:#f5f5f5}
+.modal-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:6px;width:600px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 6px 30px rgba(0,0,0,.2)}
+.modal-header{padding:16px 24px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:600}
+.modal-close{cursor:pointer;color:#999;font-size:18px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:none;background:none}
+.modal-close:hover{color:#333}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-footer{padding:12px 24px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:8px}
+.upload-area{border:2px dashed #d9d9d9;border-radius:6px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .15s;color:#666}
+.upload-area:hover,.upload-area.dragover{border-color:#1890ff;background:#e6f7ff;color:#1890ff}
+.upload-area .upload-icon{font-size:36px;margin-bottom:8px}
+.upload-area .upload-text{font-size:14px}
+.upload-area .upload-sub{color:#999;font-size:12px;margin-top:4px}
+.template-download{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:4px;color:#52c41a;font-size:13px;margin-bottom:16px;cursor:pointer}
+.template-download:hover{background:#eaffdb}
+.template-download .download-icon{font-size:18px}
+.warning-banner{background:#fff1f0;border:1px solid #ffa39e;border-radius:4px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:#cf1322;font-size:13px}
+.warning-banner .warn-icon{font-size:20px}
+.warning-banner .warn-count{font-weight:600;color:#ff4d4f}
+.reminder-banner{background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:#d48806;font-size:13px}
+.reminder-banner .reminder-icon{font-size:20px}
+.tab-switch{display:flex;gap:0;border-bottom:2px solid #f0f0f0;margin-bottom:0}
+.tab-switch .tab-item{padding:10px 20px;cursor:pointer;font-size:13px;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab-switch .tab-item:hover{color:#1890ff}
+.tab-switch .tab-item.active{color:#1890ff;border-bottom-color:#1890ff;font-weight:500}
+.compare-bar{display:inline-flex;gap:0;font-size:12px;align-items:center}
+.compare-bar .bar-label{color:#999;margin-right:6px}
+.compare-bar .bar-val{font-weight:500;color:#333}
+.compare-bar .bar-sep{color:#ccc;margin:0 4px}
+.compare-bar .bar-done{color:#52c41a}
+.compare-bar .bar-miss{color:#ff4d4f}
+.help-tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:#e8e8e8;color:#888;font-size:11px;font-weight:700;cursor:help;position:relative;vertical-align:middle;margin-left:5px;flex-shrink:0}
+.help-tip:hover{background:#1890ff;color:#fff}
+.help-tip::before{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 12px;border-radius:4px;font-size:12px;font-weight:400;line-height:1.6;white-space:normal;width:max-content;max-width:280px;text-align:left;opacity:0;visibility:hidden;transition:all .2s;z-index:9999;pointer-events:none}
+.help-tip::after{content:'';position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:rgba(0,0,0,.85);opacity:0;visibility:hidden;transition:all .2s;z-index:9999;pointer-events:none}
+.help-tip:hover::before,.help-tip:hover::after{opacity:1;visibility:visible}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">易</div>易才商保</div>
+    <nav class="sidebar-menu">
+      <div class="menu-item">首页</div>
+      <div class="menu-item">工作台</div>
+      <div class="menu-item">合同管理</div>
+      <div class="menu-item">保单管理</div>
+      <div class="menu-item">个人投保</div>
+      <div class="menu-item">财务管理</div>
+      <div class="menu-item">收付管理</div>
+      <div class="menu-item">理赔管理</div>
+      <div class="menu-item" style="background:rgba(255,255,255,.04);font-weight:500">销售管理</div>
+      <div class="sub-menu">
+        <div class="sub-item">业绩管理</div>
+        <div class="sub-item" onclick="location.href='performance-target.html'">业绩目标管理</div>
+        <div class="sub-item active">续签指标管理</div>
+        <div class="sub-item">提成管理</div>
+      </div>
+      <div class="menu-item">综合报表</div>
+      <div class="menu-item">险种计划管理</div>
+      <div class="menu-item">系统管理</div>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="breadcrumb">首页 / 销售管理 / <span class="current">续签指标管理</span></div>
+    </header>
+
+    <div class="content">
+      <div class="page-title">续签指标管理</div>
+
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">待处理客户<span class="help-tip" data-tip="筛选范围内所有续签记录总数，包含全部状态（待处理/已完成/即将到期/已逾期/已终止）">?</span></div>
+          <div class="kpi-value" id="kpiTotal">0</div>
+          <div class="kpi-sub">本月待续签客户数</div>
+        </div>
+        <div class="kpi-card success">
+          <div class="kpi-label">已完成续签<span class="help-tip" data-tip="状态为「已完成」的客户数。完成率=已完成客户数/总客户数×100%，表示客户已全额续缴保费">?</span></div>
+          <div class="kpi-value" id="kpiDone">0</div>
+          <div class="kpi-sub">已完成 <span class="up" id="kpiDoneRate">0%</span></div>
+        </div>
+        <div class="kpi-card warning">
+          <div class="kpi-label">即将到期<span class="help-tip" data-tip="应续签月份在当前日期后7天内的客户数，系统自动判定，需提前提醒客户办理续签">?</span></div>
+          <div class="kpi-value" id="kpiSoon">0</div>
+          <div class="kpi-sub">7天内到期，需提醒</div>
+        </div>
+        <div class="kpi-card danger">
+          <div class="kpi-label">逾期未续签<span class="help-tip" data-tip="应续签月份已过当前日期但仍未完成续签的客户数，系统自动判定，需紧急跟进处理">?</span></div>
+          <div class="kpi-value" id="kpiOverdue">0</div>
+          <div class="kpi-sub">已超过续签月份</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <div class="filter-group"><label>起始月份：</label>
+            <input id="filterMonthStart" type="month" value="2026-06" style="height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 10px;font-size:13px;min-width:150px;cursor:pointer">
+          </div>
+          <div class="filter-group"><label>截止月份：</label>
+            <input id="filterMonthEnd" type="month" value="2026-08" style="height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 10px;font-size:13px;min-width:150px;cursor:pointer">
+          </div>
+          <div class="filter-group"><label>付款方：</label>
+            <input id="filterPayer" type="text" placeholder="请输入付款方名称" style="min-width:160px">
+          </div>
+          <div class="filter-group"><label>客服人员：</label>
+            <input id="filterManager" type="text" placeholder="请输入客服人员" style="min-width:140px">
+          </div>
+          <div class="filter-group"><label>产品类型：</label>
+            <select id="filterInsType">
+              <option value="">全部</option>
+              <option>补充医疗</option><option>雇主</option>
+            </select>
+          </div>
+          <button class="btn primary" onclick="searchData()">🔍 查询</button>
+          <button class="btn" onclick="resetFilters()">重置</button>
+        </div>
+
+        <div class="toolbar" style="border-bottom:1px solid #f0f0f0">
+          <button class="btn primary" onclick="openImportModal()">⬆ 导入续签指标<span class="help-tip" data-tip="下载模板填写续签指标数据后上传，系统按付款方+产品类型汇总，每日更新后自动判断是否按时续签">?</span></button>
+          <span style="margin-left:auto;color:#666;font-size:12px">💡 系统按付款方+产品类型汇总，每日更新数据后自动判断是否按时续签</span>
+        </div>
+
+        <div id="warningArea"></div>
+
+        <div class="tab-switch" style="padding:0 20px;margin-bottom:0">
+          <div class="tab-item active" onclick="switchTab('all',this)">全部</div>
+          <div class="tab-item" onclick="switchTab('overdue',this)">⚠ 已逾期<span class="help-tip" data-tip="应续签月份已过当前日期且未完成续签，系统自动判定，红色行高亮预警">?</span></div>
+          <div class="tab-item" onclick="switchTab('soon',this)">🔔 即将到期<span class="help-tip" data-tip="应续签月份在当前日期后7天内，黄色行高亮提醒，需尽快联系客户">?</span></div>
+          <div class="tab-item" onclick="switchTab('pending',this)">⏳ 待处理<span class="help-tip" data-tip="尚未到达续签月份且未逾期的客户，等待后续处理">?</span></div>
+          <div class="tab-item" onclick="switchTab('done',this)">✓ 已完成<span class="help-tip" data-tip="客户已全额续缴保费，应收/已续金额和人数均达到100%">?</span></div>
+          <div class="tab-item" onclick="switchTab('terminated',this)">✕ 已终止<span class="help-tip" data-tip="客户主动终止合同，不再参与续签预警和提醒">?</span></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>付款方</th>
+              <th>产品类型</th>
+              <th>客服人员</th>
+              <th>应收保费(万)</th>
+              <th>已续保费(万)</th>
+              <th>应续员工</th>
+              <th>已续员工</th>
+              <th>应续连带</th>
+              <th>已续连带</th>
+              <th>客户等级</th>
+              <th>应续签月份</th>
+              <th>续签状态</th>
+              <th>备注</th>
+              <th>操作</th>
+            </tr></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="pagination-info" id="paginationInfo">共 0 条</div>
+          <div class="pagination-controls" id="paginationControls"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="modalContainer"></div>
+
+<script>
+var mockData=[
+  {payer:'南方科技大学',insType:'补充医疗',manager:'王芳',premium:396.8,empCount:1520,depCount:368,donePremium:396.8,doneEmp:1520,doneDep:368,level:'A',dueMonth:'2026年1月',status:'已完成',warn:false,remark:'正常续签'},
+  {payer:'南方科技大学',insType:'雇主',manager:'王芳',premium:120.5,empCount:320,depCount:85,donePremium:120.5,doneEmp:320,doneDep:85,level:'A',dueMonth:'2026年1月',status:'已完成',warn:false,remark:'正常续签'},
+  {payer:'北京兆易创新科技股份有限公司',insType:'补充医疗',manager:'李明',premium:168.5,empCount:680,depCount:150,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年2月',status:'待处理',warn:false,remark:'—'},
+  {payer:'上海均瑶集团有限公司',insType:'雇主',manager:'张伟',premium:96.3,empCount:320,depCount:85,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年2月',status:'待处理',warn:false,remark:'—'},
+  {payer:'广州立白集团有限公司',insType:'补充医疗',manager:'陈静',premium:245.6,empCount:890,depCount:220,donePremium:245.6,doneEmp:890,doneDep:220,level:'A',dueMonth:'2026年2月',status:'已完成',warn:false,remark:'正常续签'},
+  {payer:'深圳腾讯计算机系统有限公司',insType:'补充医疗',manager:'王芳',premium:586.2,empCount:2100,depCount:520,donePremium:586.2,doneEmp:2100,doneDep:520,level:'A',dueMonth:'2026年3月',status:'已完成',warn:false,remark:'正常续签'},
+  {payer:'成都兴城投资集团有限公司',insType:'雇主',manager:'李明',premium:45.8,empCount:150,depCount:45,donePremium:0,doneEmp:0,doneDep:0,level:'B',dueMonth:'2026年3月',status:'已逾期',warn:true,remark:'已逾期3天未完成续签，紧急预警'},
+  {payer:'杭州阿里巴巴集团有限公司',insType:'补充医疗',manager:'张伟',premium:142.6,empCount:560,depCount:138,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年3月',status:'已逾期',warn:true,remark:'已逾期8天未完成续签，紧急预警'},
+  {payer:'武汉建工集团有限公司',insType:'补充医疗',manager:'陈静',premium:328.5,empCount:1200,depCount:320,donePremium:328.5,doneEmp:1200,doneDep:320,level:'A',dueMonth:'2026年4月',status:'已完成',warn:false,remark:'正常续签'},
+  {payer:'南京银行股份有限公司',insType:'补充医疗',manager:'王芳',premium:210.4,empCount:800,depCount:200,donePremium:210.4,doneEmp:800,doneDep:200,level:'A',dueMonth:'2026年4月',status:'已完成',warn:false,remark:'正常续签'},
+  {payer:'天津一汽丰田汽车有限公司',insType:'雇主',manager:'李明',premium:118.6,empCount:420,depCount:110,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年4月',status:'已逾期',warn:true,remark:'已逾期2个月未续签'},
+  {payer:'西安金花企业集团股份有限公司',insType:'补充医疗',manager:'张伟',premium:92.5,empCount:350,depCount:90,donePremium:0,doneEmp:0,doneDep:0,level:'B',dueMonth:'2026年5月',status:'已逾期',warn:true,remark:'已逾期1个月未完成续签'},
+  {payer:'青岛港(集团)有限公司',insType:'雇主',manager:'陈静',premium:218.3,empCount:780,depCount:185,donePremium:218.3,doneEmp:780,doneDep:185,level:'A',dueMonth:'2026年5月',status:'已完成',warn:false,remark:'正常续签'},
+  {payer:'重庆龙湖企业拓展有限公司',insType:'补充医疗',manager:'王芳',premium:156.8,empCount:600,depCount:155,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年5月',status:'已终止',warn:false,remark:'客户主动终止合同'},
+  {payer:'沈阳机床(集团)有限责任公司',insType:'雇主',manager:'李明',premium:78.5,empCount:280,depCount:72,donePremium:0,doneEmp:0,doneDep:0,level:'B',dueMonth:'2026年6月',status:'即将到期',warn:false,remark:'7月1日到期，需提醒客户'},
+  {payer:'长沙盐津铺子食品股份有限公司',insType:'补充医疗',manager:'张伟',premium:118.4,empCount:450,depCount:120,donePremium:118.4,doneEmp:450,doneDep:120,level:'A',dueMonth:'2026年6月',status:'已完成',warn:false,remark:'正常续签'},
+  {payer:'昆明康辉旅行社有限公司',insType:'补充医疗',manager:'陈静',premium:48.6,empCount:180,depCount:48,donePremium:0,doneEmp:0,doneDep:0,level:'C',dueMonth:'2026年6月',status:'即将到期',warn:false,remark:'7月1日到期，需提醒客户'},
+  {payer:'郑州宇通客车股份有限公司',insType:'雇主',manager:'王芳',premium:145.6,empCount:520,depCount:138,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年7月',status:'即将到期',warn:false,remark:'8月1日到期，需提醒客户'},
+  {payer:'厦门渔业集团有限公司',insType:'补充医疗',manager:'李明',premium:105.2,empCount:380,depCount:95,donePremium:105.2,doneEmp:380,doneDep:95,level:'A',dueMonth:'2026年7月',status:'已完成',warn:false,remark:'正常续签'},
+  {payer:'福州华宝贸易有限公司',insType:'补充医疗',manager:'张伟',premium:58.5,empCount:220,depCount:58,donePremium:0,doneEmp:0,doneDep:0,level:'B',dueMonth:'2026年7月',status:'即将到期',warn:false,remark:'8月1日到期，需提醒客户'},
+  {payer:'合肥科大讯飞股份有限公司',insType:'补充医疗',manager:'陈静',premium:172.8,empCount:650,depCount:165,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年8月',status:'待处理',warn:false,remark:'—'},
+  {payer:'北京字节跳动科技有限公司',insType:'补充医疗',manager:'王芳',premium:420.0,empCount:1800,depCount:450,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年8月',status:'待处理',warn:false,remark:'—'},
+  {payer:'上海拼多多网络科技有限公司',insType:'补充医疗',manager:'李明',premium:358.6,empCount:1200,depCount:380,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年8月',status:'待处理',warn:false,remark:'—'},
+  {payer:'广州广汽集团股份有限公司',insType:'雇主',manager:'张伟',premium:268.0,empCount:950,depCount:260,donePremium:0,doneEmp:0,doneDep:0,level:'A',dueMonth:'2026年8月',status:'待处理',warn:false,remark:'—'},
+  {payer:'四川长虹电器股份有限公司',insType:'补充医疗',manager:'陈静',premium:88.5,empCount:320,depCount:86,donePremium:0,doneEmp:0,doneDep:0,level:'B',dueMonth:'2026年8月',status:'待处理',warn:false,remark:'—'}
+];
+
+var currentPage=1;
+var pageSize=10;
+var filteredData=[];
+var currentTab='all';
+
+function getStatusTag(status){
+  if(status==='已完成')return '<span class="tag green">✓ 已完成</span>';
+  if(status==='待处理')return '<span class="tag blue">待处理</span>';
+  if(status==='即将到期')return '<span class="tag orange">🔔 即将到期</span>';
+  if(status==='已逾期')return '<span class="tag red">⚠ 已逾期</span>';
+  if(status==='已终止')return '<span class="tag gray">已终止</span>';
+  return '<span class="tag">'+status+'</span>';
+}
+
+function getLevelTag(level){
+  if(level==='A')return '<span class="tag green">A级</span>';
+  if(level==='B')return '<span class="tag blue">B级</span>';
+  if(level==='C')return '<span class="tag orange">C级</span>';
+  return '<span class="tag gray">'+level+'</span>';
+}
+
+function getInsTypeTag(t){
+  if(t==='补充医疗')return '<span class="tag blue">补充医疗</span>';
+  if(t==='雇主')return '<span class="tag purple">雇主</span>';
+  return '<span class="tag">'+t+'</span>';
+}
+
+function renderKPIs(){
+  var total=filteredData.length;
+  var done=filteredData.filter(function(d){return d.status==='已完成'}).length;
+  var soon=filteredData.filter(function(d){return d.status==='即将到期'}).length;
+  var overdue=filteredData.filter(function(d){return d.status==='已逾期'}).length;
+  document.getElementById('kpiTotal').textContent=total;
+  document.getElementById('kpiDone').textContent=done;
+  document.getElementById('kpiDoneRate').textContent=total>0?(done/total*100).toFixed(1)+'%':'0%';
+  document.getElementById('kpiSoon').textContent=soon;
+  document.getElementById('kpiOverdue').textContent=overdue;
+}
+
+function renderWarning(){
+  var warns=filteredData.filter(function(d){return d.warn});
+  var reminders=filteredData.filter(function(d){return !d.warn&&d.status==='即将到期'});
+  var area=document.getElementById('warningArea');
+  var html='';
+  if(warns.length>0){
+    html+='<div class="warning-banner"><span class="warn-icon">⚠</span><span>共 <span class="warn-count">'+warns.length+'</span> 条预警记录（已逾期未完成续签），请及时处理！</span></div>';
+  }
+  if(reminders.length>0){
+    html+='<div class="reminder-banner"><span class="reminder-icon">🔔</span><span>共 <span style="font-weight:600;color:#d48806">'+reminders.length+'</span> 条提醒记录（即将到期，需提醒客户）</span></div>';
+  }
+  area.innerHTML=html;
+}
+
+function renderCompareBar(done,total){
+  var cls=done>=total?'bar-done':'bar-miss';
+  return '<span class="compare-bar"><span class="bar-label">应收</span><span class="bar-val">'+total.toFixed(1)+'</span><span class="bar-sep">/</span><span class="bar-label">已续</span><span class="bar-val '+cls+'">'+done.toFixed(1)+'</span></span>';
+}
+
+function renderTable(){
+  var tbody=document.getElementById('tableBody');
+  var data=filteredData;
+  if(currentTab==='overdue')data=filteredData.filter(function(d){return d.status==='已逾期'});
+  else if(currentTab==='soon')data=filteredData.filter(function(d){return d.status==='即将到期'});
+  else if(currentTab==='pending')data=filteredData.filter(function(d){return d.status==='待处理'});
+  else if(currentTab==='done')data=filteredData.filter(function(d){return d.status==='已完成'});
+  else if(currentTab==='terminated')data=filteredData.filter(function(d){return d.status==='已终止'});
+  var start=(currentPage-1)*pageSize;
+  var pageData=data.slice(start,start+pageSize);
+  var html='';
+  if(pageData.length===0){
+    html='<tr><td colspan="14" style="text-align:center;padding:60px;color:#999">暂无数据</td></tr>';
+  }else{
+    pageData.forEach(function(d,i){
+      var rowCls=d.warn?'danger-row':(!d.warn&&d.status==='即将到期'?'reminder-row':'');
+      var idxInAll=filteredData.indexOf(d);
+      var premCls=d.donePremium>=d.premium?'color:#52c41a':(d.donePremium>0?'color:#faad14':'color:#999');
+      var empCls=d.doneEmp>=d.empCount?'color:#52c41a':(d.doneEmp>0?'color:#faad14':'color:#999');
+      var depCls=d.doneDep>=d.depCount?'color:#52c41a':(d.doneDep>0?'color:#faad14':'color:#999');
+      html+='<tr class="'+rowCls+'">'+
+        '<td style="font-weight:500">'+d.payer+'</td>'+
+        '<td>'+getInsTypeTag(d.insType)+'</td>'+
+        '<td>'+d.manager+'</td>'+
+        '<td>'+d.premium.toFixed(1)+'</td>'+
+        '<td style="'+premCls+'">'+d.donePremium.toFixed(1)+'</td>'+
+        '<td>'+d.empCount+'</td>'+
+        '<td style="'+empCls+'">'+d.doneEmp+'</td>'+
+        '<td>'+d.depCount+'</td>'+
+        '<td style="'+depCls+'">'+d.doneDep+'</td>'+
+        '<td>'+getLevelTag(d.level)+'</td>'+
+        '<td style="font-size:12px">'+d.dueMonth+'</td>'+
+        '<td>'+getStatusTag(d.status)+'</td>'+
+        '<td style="font-size:12px;color:'+(d.warn?'#ff4d4f':'color:'+(d.status==='即将到期'?'#faad14':'#666'))+'">'+d.remark+'</td>'+
+        '<td><span class="action-link" onclick="openDetailModal('+idxInAll+')">详情</span><span class="action-link" onclick="markRenewal('+idxInAll+')">标记续签</span></td>'+
+        '</tr>';
+    });
+  }
+  tbody.innerHTML=html;
+  renderPagination(data.length);
+}
+
+function renderPagination(total){
+  var totalPages=Math.max(1,Math.ceil(total/pageSize));
+  document.getElementById('paginationInfo').textContent='共 '+total+' 条';
+  var html='';
+  html+='<select onchange="pageSize=parseInt(this.value);currentPage=1;renderTable()" style="height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 28px 0 10px;font-size:13px">';
+  html+='<option value="5"'+(pageSize===5?' selected':'')+'>5条/页</option>';
+  html+='<option value="10"'+(pageSize===10?' selected':'')+'>10条/页</option>';
+  html+='<option value="20"'+(pageSize===20?' selected':'')+'>20条/页</option>';
+  html+='</select>';
+  html+='<button class="page-btn" onclick="currentPage=1;renderTable()"'+(currentPage===1?' disabled':'')+'>«</button>';
+  html+='<button class="page-btn" onclick="currentPage--;renderTable()"'+(currentPage===1?' disabled':'')+'>‹</button>';
+  var sp=Math.max(1,currentPage-2);var ep=Math.min(totalPages,sp+4);
+  if(ep-sp<4)sp=Math.max(1,ep-4);
+  for(var i=sp;i<=ep;i++){html+='<button class="page-btn'+(i===currentPage?' active':'')+'" onclick="currentPage='+i+';renderTable()">'+i+'</button>'}
+  html+='<button class="page-btn" onclick="currentPage++;renderTable()"'+(currentPage===totalPages?' disabled':'')+'>›</button>';
+  html+='<button class="page-btn" onclick="currentPage='+totalPages+';renderTable()"'+(currentPage===totalPages?' disabled':'')+'>»</button>';
+  document.getElementById('paginationControls').innerHTML=html;
+}
+
+function switchTab(tab,el){
+  currentTab=tab;
+  document.querySelectorAll('.tab-item').forEach(function(t){t.classList.remove('active')});
+  if(el)el.classList.add('active');
+  currentPage=1;
+  renderTable();
+}
+
+function monthToNum(str){
+  var parts=str.match(/(\d{4})年(\d{1,2})月/);
+  return parts?parseInt(parts[1])*100+parseInt(parts[2]):0;
+}
+function searchData(){
+  var ms=document.getElementById('filterMonthStart').value;
+  var me=document.getElementById('filterMonthEnd').value;
+  var startNum=ms?parseInt(ms.replace('-','')):0;
+  var endNum=me?parseInt(me.replace('-','')):9999;
+  var payer=document.getElementById('filterPayer').value.trim();
+  var manager=document.getElementById('filterManager').value.trim();
+  var insType=document.getElementById('filterInsType').value;
+  filteredData=mockData.filter(function(d){
+    var dNum=monthToNum(d.dueMonth);
+    if(startNum&&dNum<startNum)return false;
+    if(endNum<9999&&dNum>endNum)return false;
+    if(payer&&d.payer.indexOf(payer)<0)return false;
+    if(manager&&d.manager.indexOf(manager)<0)return false;
+    if(insType&&d.insType!==insType)return false;
+    return true;
+  });
+  currentPage=1;
+  renderKPIs();
+  renderWarning();
+  renderTable();
+}
+
+function resetFilters(){
+  document.getElementById('filterMonthStart').value='2026-06';
+  document.getElementById('filterMonthEnd').value='2026-08';
+  document.getElementById('filterPayer').value='';
+  document.getElementById('filterManager').value='';
+  document.getElementById('filterInsType').value='';
+  filteredData=mockData.slice();
+  currentPage=1;
+  currentTab='all';
+  document.querySelectorAll('.tab-item').forEach(function(t,i){t.classList.toggle('active',i===0)});
+  renderKPIs();
+  renderWarning();
+  renderTable();
+}
+
+function autoCheck(){
+  // 数据每日更新后自动核查状态（保留函数供导入后调用）
+  var now=new Date('2026-08-06');
+  mockData.forEach(function(d){
+    if(d.status==='已终止'||d.status==='已完成')return;
+    var parts=d.dueMonth.match(/(\d{4})年(\d{1,2})月/);
+    if(!parts)return;
+    var year=parseInt(parts[1]);var month=parseInt(parts[2]);
+    var lastDay=new Date(year,month,0).getDate();
+    var end=new Date(year,month-1,lastDay);
+    var diffDays=Math.floor((end-now)/(1000*60*60*24));
+    if(diffDays<0){
+      d.status='已逾期';d.warn=true;d.remark='已逾期'+Math.abs(diffDays)+'天未完成续签，紧急预警';
+    }else if(diffDays<=7){
+      d.status='即将到期';d.warn=false;d.remark='距离续签截止还剩'+diffDays+'天，需提醒客户';
+    }else{
+      d.status='待处理';d.warn=false;d.remark='—';
+    }
+  });
+  searchData();
+}
+
+function openModal(html){document.getElementById('modalContainer').innerHTML=html}
+function closeModal(){document.getElementById('modalContainer').innerHTML=''}
+
+function openDetailModal(idx){
+  var d=filteredData[idx];if(!d)return;
+  var premCls=d.donePremium>=d.premium?'color:#52c41a':'color:#ff4d4f';
+  var empCls=d.doneEmp>=d.empCount?'color:#52c41a':'color:#ff4d4f';
+  var depCls=d.doneDep>=d.depCount?'color:#52c41a':'color:#ff4d4f';
+  var fs=[
+    ['付款方',d.payer],
+    ['产品类型',getInsTypeTag(d.insType)],
+    ['客服人员',d.manager],
+    ['应收保费(万)',d.premium.toFixed(1)],
+    ['已续保费(万)',d.donePremium.toFixed(1)],
+    ['应续员工',d.empCount+' 人'],
+    ['已续员工',d.doneEmp+' 人'],
+    ['应续连带',d.depCount+' 人'],
+    ['已续连带',d.doneDep+' 人'],
+    ['客户等级',getLevelTag(d.level)],
+    ['应续签月份',d.dueMonth],
+    ['续签状态',getStatusTag(d.status)],
+    ['完成进度','<span style="color:'+premCls+';font-weight:600">'+(d.premium>0?(d.donePremium/d.premium*100).toFixed(1):'0')+'%</span>']
+  ];
+  var rows=fs.map(function(f,i){
+    var v=f[1];if(i===1)v=getInsTypeTag(d.insType);
+    if(i===9)v=getLevelTag(d.level);
+    if(i===11)v=getStatusTag(d.status);
+    return '<div style="display:flex;margin-bottom:12px"><div style="width:100px;color:#666">'+f[0]+'：</div><div style="flex:1;font-weight:'+(i>=3&&i<=8?'500':'400')+'">'+v+'</div></div>'
+  }).join('');
+  openModal('<div class="modal-mask" onclick="if(event.target===this)closeModal()"><div class="modal" style="width:560px"><div class="modal-header"><div class="modal-title">续签详情</div><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div style="background:#e6f7ff;border:1px solid #91d5ff;border-radius:4px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1890ff">📌 付款方：'+d.payer+' | 产品：'+d.insType+'</div>'+rows+'</div><div class="modal-footer"><button class="btn" onclick="closeModal()">关闭</button><button class="btn primary" onclick="closeModal();markRenewal('+idx+')">标记续签</button></div></div></div>');
+}
+
+function markRenewal(idx){
+  var d=filteredData[idx];if(!d)return;
+  var opts=[
+    {key:'已完成',label:'✓ 已完成',color:'#52c41a',desc:'客户已完成续签，应收保费/人数全额到账'},
+    {key:'已终止',label:'✕ 已终止',color:'#8c8c8c',desc:'客户主动终止合同，不再预警提醒'},
+    {key:'待处理',label:'○ 待处理',color:'#1890ff',desc:'客户尚未处理，等待续签'},
+    {key:'即将到期',label:'🔔 即将到期',color:'#fa8c16',desc:'即将到期需提醒客户'}
+  ];
+  var optHtml=opts.map(function(o,i){
+    return '<label style="display:flex;align-items:flex-start;padding:12px;border:1px solid #f0f0f0;border-radius:4px;margin-bottom:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\'#1890ff\'" onmouseout="this.style.borderColor=\'#f0f0f0\'">'+
+      '<input type="radio" name="statusOpt" value="'+o.key+'" style="margin-right:10px;margin-top:3px"'+(i===0?' checked':'')+'>'+
+      '<div style="flex:1"><div style="font-weight:500;color:'+o.color+';margin-bottom:4px">'+o.label+'</div><div style="font-size:12px;color:#999">'+o.desc+'</div></div>'+
+    '</label>'
+  }).join('');
+  var html='<div class="modal-mask" onclick="if(event.target===this)closeModal()"><div class="modal" style="width:480px">'+
+    '<div class="modal-header"><div class="modal-title">标记续签状态</div><button class="modal-close" onclick="closeModal()">✕</button></div>'+
+    '<div class="modal-body">'+
+      '<div style="background:#f5f5f5;border-radius:4px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#666">📌 付款方：<b>'+d.payer+'</b> | 产品：'+d.insType+' | 当前状态：'+d.status+'</div>'+
+      '<div style="margin-bottom:8px;color:#333;font-size:13px">请选择要标记的状态：</div>'+
+      optHtml+
+      '<div class="form-row" style="margin-top:16px"><label style="width:auto;padding-right:8px">备注：</label><input id="markRemark" type="text" placeholder="选填，如：客户已完成续签" style="flex:1"></div>'+
+    '</div>'+
+    '<div class="modal-footer"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="doMarkRenewal('+idx+')">确认标记</button></div>'+
+  '</div></div>';
+  openModal(html);
+}
+
+function doMarkRenewal(idx){
+  var d=filteredData[idx];if(!d)return;
+  var sel=document.querySelector('input[name="statusOpt"]:checked');
+  if(!sel){alert('请选择要标记的状态');return}
+  var status=sel.value;
+  var remark=document.getElementById('markRemark').value.trim();
+  d.status=status;
+  if(status==='已完成'){
+    d.warn=false;
+    d.donePremium=d.premium;d.doneEmp=d.empCount;d.doneDep=d.depCount;
+    d.remark=remark||'客户已完成续签';
+  }else if(status==='已终止'){
+    d.warn=false;
+    d.remark=remark||'客户主动终止合同，不再预警';
+  }else if(status==='待处理'){
+    d.warn=false;
+    d.remark=remark||'—';
+  }else if(status==='即将到期'){
+    d.warn=false;
+    d.remark=remark||'保障期限即将到期，需提醒客户';
+  }
+  closeModal();
+  searchData();
+}
+
+function handleRenewal(payer,insType){
+  var d=mockData.find(function(m){return m.payer===payer&&m.insType===insType});
+  if(!d)return;
+  d.status='已完成';d.warn=false;
+  d.donePremium=d.premium;d.doneEmp=d.empCount;d.doneDep=d.depCount;
+  d.remark='客户已完成续签';
+  searchData();
+}
+
+function openImportModal(){
+  var html='<div class="modal-mask" onclick="if(event.target===this)closeModal()"><div class="modal">'+
+    '<div class="modal-header"><div class="modal-title">导入续签指标</div><button class="modal-close" onclick="closeModal()">✕</button></div>'+
+    '<div class="modal-body">'+
+      '<div style="background:#e6f7ff;border:1px solid #91d5ff;border-radius:4px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1890ff">💡 导入后系统将按付款方+产品类型汇总，自动判断是否按时完成续签。标记为「终止」的保单不参与预警。</div>'+
+      '<div class="template-download" onclick="downloadTemplate()"><span class="download-icon">📥</span>下载「续签指标导入模板」</div>'+
+      '<div class="upload-area" onclick="document.getElementById(\'fileInput\').click()" ondragover="this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="handleDrop(event)">'+
+        '<div class="upload-icon">📁</div>'+
+        '<div class="upload-text">点击或拖拽文件到此处上传</div>'+
+        '<div class="upload-sub">支持 .xlsx / .xls 格式文件，单次最多导入1000条数据</div>'+
+      '</div>'+
+      '<input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleFile(this)">'+
+      '<div style="color:#999;font-size:12px;margin-top:12px">请先下载模板，按照模板格式填写后上传。系统将自动核查续签状态并生成预警。</div>'+
+    '</div>'+
+    '<div class="modal-footer"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="alert(\'文件上传成功，系统将自动核查续签状态\');closeModal()">确认导入</button></div>'+
+  '</div></div>';
+  openModal(html);
+}
+
+function downloadTemplate(){
+  alert('模板下载：续签指标导入模板.xlsx\n\n包含字段：付款方、产品类型、客服人员、应收保费、应续员工人数、应续连带人数、客户等级、应续签月份、是否终止');
+}
+
+function handleFile(input){
+  if(input.files.length>0){
+    alert('已选择文件：' + input.files[0].name + '\n点击「确认导入」后系统将自动核查续签状态');
+  }
+}
+
+filteredData=mockData.slice();
+renderKPIs();
+renderWarning();
+renderTable();
+</script>
+</body>
+</html>
