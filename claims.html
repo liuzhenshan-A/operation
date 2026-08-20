@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -94,14 +94,21 @@ tbody td:first-child{text-align:left;font-weight:550}
 tbody tr{transition:background .12s}
 tbody tr:hover{background:var(--c-row-hover)}
 tbody tr.group-row td{font-weight:650;color:var(--c-text);border-bottom:1px solid var(--c-border);background:#fafbfd;font-size:13px}
+tbody tr.expandable-row{background:#fff}
+tbody tr.expandable-row:hover{background:var(--c-row-hover)}
+.expand-arrow{display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;cursor:pointer;color:#8c8c8c;font-size:10px;margin-right:4px;border-radius:3px;transition:all .15s;user-select:none}
+.expand-arrow:hover{background:#e6f7ff;color:#1890ff}
+tbody tr.child-row{background:#fafcff}
+tbody tr.child-row td{color:#666;font-size:13px;border-bottom:1px dashed #e8e8e8}
+.child-val{opacity:.85}
 .delta-positive{color:var(--red);font-weight:650}.delta-negative{color:var(--green);font-weight:650}
 .rate-cell{font-weight:650}.rate-high{color:var(--red)}.rate-warn{color:var(--orange)}.rate-ok{color:var(--green)}
 .info-tip{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#e8ebf3;color:#949aad;font-size:10px;font-weight:700;cursor:help;flex-shrink:0;transition:all .15s;line-height:1;vertical-align:middle;margin-left:5px}
 .info-tip:hover{background:var(--blue);color:#fff}
-.tooltip-popup{position:fixed!important;z-index:2147483647;pointer-events:auto;background:#2a2f45;color:#fff;padding:14px 20px;border-radius:10px;font-size:13px;line-height:1.8;max-width:700px;min-width:300px;white-space:normal;word-wrap:break-word;overflow-wrap:break-word;box-shadow:0 10px 32px rgba(0,0,0,.22);opacity:0;transform:translate(-50%,-100%) translateY(6px);transition:opacity .18s,transform .18s;transform-origin:bottom center}
-.tooltip-popup.show{opacity:1;transform:translate(-50%,-100%) translateY(0)}
-.tooltip-popup[data-dir="down"]{transform-origin:top center;transform:translate(-50%,0) translateY(-6px)}
-.tooltip-popup[data-dir="down"].show{transform:translate(-50%,0) translateY(0)}
+.tooltip-popup{position:fixed!important;z-index:2147483647;pointer-events:auto;background:#2a2f45;color:#fff;padding:14px 20px;border-radius:10px;font-size:13px;line-height:1.8;max-width:700px;min-width:300px;white-space:normal;word-wrap:break-word;overflow-wrap:break-word;box-shadow:0 10px 32px rgba(0,0,0,.22);opacity:0;transform:translateX(-50%);transition:opacity .18s,transform .18s}
+.tooltip-popup.show{opacity:1}
+.tooltip-popup[data-dir="down"]{transform:translateX(-50%)}
+.tooltip-popup[data-dir="down"].show{opacity:1}
 .tooltip-popup .tip-rules{color:#b9bfd4;font-size:12px;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.12)}
 .claim-multi-wrap{position:relative;flex-shrink:0;height:36px;outline:none}
 .multi-select{position:relative;display:inline-block;height:100%;outline:none}
@@ -146,7 +153,7 @@ body{overflow:visible!important}
           <div class="form-item">
             <label>所属客服</label>
             <input type="text" id="filterService" placeholder="请输入所属客服">
-            <span class="help-icon" data-title="客服名称精准匹配">?</span>
+            <span class="info-tip" data-tip="不选默认查看全部客服数据，如果查询部分客服可用英文逗号隔开">?</span>
           </div>
           <div class="form-item">
             <label>所属保司</label>
@@ -156,40 +163,41 @@ body{overflow:visible!important}
               <option value="平安保险">平安保险</option>
               <option value="太平洋保险">太平洋保险</option>
             </select>
-            <span class="help-icon" data-title="下拉展示系统内所有保司名称，单选">?</span>
+            <span class="info-tip" data-tip="下拉展示系统内所有保司名称，单选">?</span>
           </div>
           <div class="form-item claim-multi-wrap">
-            <label>理赔查询</label>
+            <label>保险类别</label>
             <div class="multi-select" data-ms>
               <div class="multi-select-trigger">
-                <span class="multi-select-text ms-placeholder">请选择理赔人员</span>
+                <span class="multi-select-text ms-placeholder">请选择保险类别</span>
               </div>
               <div class="multi-select-dropdown">
                 <ul class="multi-select-list">
-                  <li data-value="李雪">李雪</li>
-                  <li data-value="李旭">李旭</li>
-                  <li data-value="慢羊羊">毛洋洋</li>
-                  <li data-value="慢羊羊">齐水秀</li>
-                  <li data-value="慢羊羊">王亮</li>
+                  <li data-value="补充医疗">补充医疗</li>
+                  <li data-value="意外险">意外险</li>
+                  <li data-value="大额医疗">大额医疗</li>
+                  <li data-value="百万医疗">百万医疗</li>
+                  <li data-value="易企保">易企保</li>
+                  <li data-value="易企药安心">易企药安心</li>
                 </ul>
               </div>
             </div>
-            <span class="help-icon" data-title="人员数据通过：管理后台-理赔管理-权限管理获取，支持多选理赔人员，通过已选理赔人员对应关联的客服进行数据范围锁定">?</span>
-          </div>
+            <span class="info-tip" data-tip="支持多选保险类别，通过已选保险类别进行数据范围锁定">?</span>
+          </div> 
           <div class="form-item">
             <label>大帽子</label>
             <input type="text" id="filterBigHat" placeholder="请输入大帽子">
-            <span class="help-icon" data-title="名称精准查询">?</span>
+            <span class="info-tip" data-tip="名称精准查询">?</span>
           </div>
           <div class="form-item">
             <label>合同方</label>
             <input type="text" id="filterContractParty" placeholder="请输入合同方">
-            <span class="help-icon" data-title="名称精准查询">?</span>
+            <span class="info-tip" data-tip="名称精准查询">?</span>
           </div>
           <div class="form-item">
             <label>付款方</label>
             <input type="text" id="filterPayer" placeholder="请输入付款方">
-            <span class="help-icon" data-title="名称精准查询">?</span>
+            <span class="info-tip" data-tip="名称精准查询">?</span>
           </div>
           <div class="form-item">
             <label>当前年度</label>
@@ -197,7 +205,7 @@ body{overflow:visible!important}
               <option value="2024" selected>2025年</option>
               <option value="2025">2026年</option>
             </select>
-            <span class="help-icon" data-title="选择当前统计年度">?</span>
+            <span class="info-tip" data-tip="选择当前统计年度">?</span>
           </div>
           <div class="form-item">
             <label>截止月份</label>
@@ -208,7 +216,7 @@ body{overflow:visible!important}
               <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
               <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
             </select>
-            <span class="help-icon" data-title="选择数据统计截止月份">?</span>
+            <span class="info-tip" data-tip="选择数据统计截止月份">?</span>
           </div>
           <div class="form-item">
             <label>同期对比</label>
@@ -216,7 +224,7 @@ body{overflow:visible!important}
               <option value="2023" selected>2025年</option>
               <option value="2024">2024年</option>
             </select>
-            <span class="help-icon" data-title="选择同期对比年度">?</span>
+            <span class="info-tip" data-tip="选择同期对比年度">?</span>
           </div>
           <button type="button" class="search-btn" onclick="refreshData()">查询</button>
           <button type="button" class="search-btn" style="background:#d9d9d9" onclick="resetFilters()">重置</button>
@@ -318,7 +326,7 @@ function generateMonthlyTrend() {
 function generateKPI() {
   return {
     premium: {
-      name: '应支保费（含手续费）',
+      name: '年化应支（含手续费）',
       tip: '统计查询范围内所有团单的应支保费总和，计算方式如下：</br>年缴 = 实际经过月份应支保费。</br>月缴 = 经过月份+最后一个账单月应支保费*剩余月份。</br>季度 = 已出账单总应支/3*团单总月份。</br>半年 = 已出账单总应支/6*团单总月份。',
       rules: '同期口径：对应历史保单年度同期保费。',
       unit: '万元',
@@ -330,7 +338,7 @@ function generateKPI() {
       pct: 10.40
     },
     actualPay: {
-      name: '实际应支',
+      name: '实际应支（含手续费）',
       tip: '统计查询范围内所有团单的真实已出账单金额，不做年化转换。</br>月缴 = 已出账单金额。</br>季度 = 已出账单金额。</br>半年缴 = 已出账单金额。</br>年缴 = 实际经过月份应支保费。',
       rules: '按真实已出账单金额统计，月缴、半年缴、季度缴费不转换成年化保费。',
       unit: '万元',
@@ -344,7 +352,7 @@ function generateKPI() {
     available: {
       name: '可用赔款',
       tip: '可用于理赔支出的总预算额度。',
-      rules: '可用赔款 = 应支保费（不含手续费）。',
+      rules: '可用赔款 = 年化应支（不含手续费）。',
       unit: '万元',
       icon: '📋',
       cls: 'c2',
@@ -416,7 +424,17 @@ function generateDetails() {
     ],
     deduct: [
       { cat: '扣除项', name: '免赔扣除', sync: 38.6, cur: 45.2, sr: 9.19, cr: 9.38 },
-      { cat: '扣除项', name: '其他扣除金额', sync: 18.2, cur: 21.5, sr: 4.33, cr: 4.46 },
+      { cat: '扣除项', name: '其他扣除金额', sync: 18.2, cur: 21.5, sr: 4.33, cr: 4.46, expandable: true, expanded: false, children: [
+        { cat: '扣除项', name: '超量用药扣除', sync: 3.0, cur: 3.6, sr: 0.71, cr: 0.75, parent: '其他扣除金额' },
+        { cat: '扣除项', name: '除外责任扣除', sync: 2.4, cur: 2.9, sr: 0.57, cr: 0.60, parent: '其他扣除金额' },
+        { cat: '扣除项', name: '特殊材料扣除', sync: 1.6, cur: 1.8, sr: 0.38, cr: 0.37, parent: '其他扣除金额' },
+        { cat: '扣除项', name: '康复科扣除', sync: 1.6, cur: 2.0, sr: 0.38, cr: 0.41, parent: '其他扣除金额' },
+        { cat: '扣除项', name: '康复治疗扣除', sync: 2.0, cur: 2.4, sr: 0.48, cr: 0.50, parent: '其他扣除金额' },
+        { cat: '扣除项', name: '牙科扣除', sync: 2.2, cur: 2.6, sr: 0.52, cr: 0.54, parent: '其他扣除金额' },
+        { cat: '扣除项', name: '牙科日限额扣除', sync: 1.8, cur: 2.3, sr: 0.43, cr: 0.48, parent: '其他扣除金额' },
+        { cat: '扣除项', name: '椎间盘突出扣除', sync: 2.0, cur: 2.3, sr: 0.48, cr: 0.48, parent: '其他扣除金额' },
+        { cat: '扣除项', name: '其他', sync: 1.6, cur: 1.6, sr: 0.38, cr: 0.33, parent: '其他扣除金额' }
+      ]},
       { cat: '扣除项', name: '超限额扣除', sync: 12.8, cur: 15.3, sr: 3.05, cr: 3.17 },
       { cat: '扣除项', name: '特殊比例扣除', sync: 8.4, cur: 9.8, sr: 2.00, cr: 2.03 }
     ]
@@ -841,9 +859,18 @@ function renderTable(details, tab) {
     '挂号费': '发票明细项目中 费用类型=挂号费，统计明细项目的「实赔金额」字段。',
     '其他费用赔款': '发票明细项目中 费用类型=其他，统计明细项目的「实赔金额」字段。',
     '免赔扣除': '发票明细项目中 ，免赔扣除字段，2026年之前的案件，统计案件上的免赔扣除，2026年之后的统计明细项目中的免赔扣除',
-    '其他扣除金额': '发票明细项目中 ，扣除金额字段，2026年之前的案件，统计发票上扣除项目的金额，2026年之后的统计明细项目中的免扣除金额',
+    '其他扣除金额': '其他扣除金额 = 超量用药扣除 + 除外责任扣除 + 特殊材料扣除 + 康复科扣除 + 康复治疗扣除 + 牙科扣除 + 牙科日限额扣除 + 椎间盘突出扣除 + 其他。点击左侧箭头展开查看明细。',
     '超限额扣除': '发票明细项目中 ，超限额扣除字段',
-    '特殊比例扣除': '发票明细项目中 ，特殊比例扣除字段'
+    '特殊比例扣除': '发票明细项目中 ，特殊比例扣除字段',
+    '超量用药扣除': '发票明细项目中，药品类型对应的超量使用部分扣除金额，按医保目录规定的用药量限制计算超出部分。',
+    '除外责任扣除': '发票明细项目中，属于保险条款约定的除外责任范围的费用扣除金额，如自费药、免责项目等。',
+    '特殊材料扣除': '发票明细项目中，特殊医用材料超出限额或非约定范围的扣除金额，如进口材料差额部分。',
+    '康复科扣除': '发票明细项目中，科室=康复科，超过条款约定的康复治疗范围或次数标准的扣除金额。',
+    '康复治疗扣除': '发票明细项目中，费用类型=康复治疗，超出条款康复治疗额度上限或不在约定范围内的治疗项目扣除金额。',
+    '牙科扣除': '发票明细项目中，费用类型=牙科（义齿、修复、种植等），按条款牙科责任额度的扣除金额。',
+    '牙科日限额扣除': '发票明细项目中，牙科就诊单日费用超过条款日限额标准的扣除金额。',
+    '椎间盘突出扣除': '发票明细项目中，确诊为椎间盘突出的相关费用，按条款约定的专项扣除比例或额度扣除的金额。',
+    '其他': '发票明细项目中，不属于以上各项分类的其他杂项扣除金额，如零星扣费、资料不全退回扣除、系统调账等。'
   };
 
   const add = (data) => {
@@ -857,7 +884,12 @@ function renderTable(details, tab) {
       sync: ts, cur: tc, delta: tc - ts,
       sr: ts / 420 * 100, cr: tc / 482 * 100
     });
-    data.forEach(d => rows.push({ type: 'item', ...d, delta: d.cur - d.sync }));
+    data.forEach(d => {
+      rows.push({ type: 'item', ...d, delta: d.cur - d.sync });
+      if (d.expandable && d.expanded && d.children) {
+        d.children.forEach(c => rows.push({ type: 'child', ...c, delta: c.cur - c.sync }));
+      }
+    });
   };
 
   if (tab === 'all' || tab === 'visit') add(details.visit);
@@ -884,16 +916,32 @@ function renderTable(details, tab) {
       h += `<tr class="group-row">
         <td>${r.name}</td>
         <td><strong>${r.sync.toFixed(2)}</strong></td>
-        <td><strong>${r.sr.toFixed(2)}%</strong></td>
+        <td style="background:#fafbfd"></td>
         <td><strong>${r.cur.toFixed(2)}</strong></td>
-        <td><strong>${r.cr.toFixed(2)}%</strong></td>
+        <td style="background:#fafbfd"></td>
         <td class="${dc}"><strong>${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(2)}</strong></td>
-        <td class="rate-cell ${rc}">${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%</td>
+        <td class="rate-cell ${rc}"><strong>${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%</strong></td>
+      </tr>`;
+    } else if (r.type === 'child') {
+      const tip = tipMap[r.name] || '该项赔款的计算逻辑：统计对应分类下的核定赔款金额汇总。';
+      h += `<tr class="child-row">
+        <td style="padding-left:60px">└ ${r.name}<span class="info-tip" data-tip="${tip}" data-rules="">?</span></td>
+        <td class="child-val">${r.sync.toFixed(2)}</td>
+        <td class="child-val">${r.sr.toFixed(2)}%</td>
+        <td class="child-val">${r.cur.toFixed(2)}</td>
+        <td class="child-val">${r.cr.toFixed(2)}%</td>
+        <td class="child-val ${dc}">${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(2)}</td>
+        <td class="rate-cell ${rc} child-val">${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%</td>
       </tr>`;
     } else {
       const tip = tipMap[r.name] || '该项赔款的计算逻辑：统计对应分类下的核定赔款金额汇总。';
-      h += `<tr>
-        <td style="padding-left:26px">${r.name}<span class="info-tip" data-tip="${tip}" data-rules="">?</span></td>
+      let prefix = '';
+      if (r.expandable) {
+        const arrow = r.expanded ? '▼' : '▶';
+        prefix = `<span class="expand-arrow" onclick="toggleExpand('${r.name}')">${arrow}</span>`;
+      }
+      h += `<tr class="${r.expandable ? 'expandable-row' : ''}">
+        <td style="padding-left:${r.expandable ? '0' : '26px'}">${prefix}${r.expandable ? '' : ''}${r.name}<span class="info-tip" data-tip="${tip}" data-rules="">?</span></td>
         <td>${r.sync.toFixed(2)}</td>
         <td>${r.sr.toFixed(2)}%</td>
         <td>${r.cur.toFixed(2)}</td>
@@ -907,9 +955,9 @@ function renderTable(details, tab) {
   h += `<tr class="group-row" style="background:#f0f3ff">
     <td>总计</td>
     <td><strong>420.00</strong></td>
-    <td><strong>100%</strong></td>
+    <td style="background:#f0f3ff"></td>
     <td><strong>482.00</strong></td>
-    <td><strong>100%</strong></td>
+    <td style="background:#f0f3ff"></td>
     <td class="delta-positive"><strong>+62.00</strong></td>
     <td class="rate-cell rate-warn"><strong>+14.8%</strong></td>
   </tr>`;
@@ -939,18 +987,18 @@ function showTip(el) {
   const rect = el.getBoundingClientRect();
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  let left = rect.left + rect.width / 2;
   requestAnimationFrame(() => {
     const tw = tooltipEl.offsetWidth;
     const th = tooltipEl.offsetHeight;
-    const margin = 10;
+    const margin = 8;
+    let left = rect.left + rect.width / 2;
     if (left - tw / 2 < margin) left = tw / 2 + margin;
     if (left + tw / 2 > vw - margin) left = vw - tw / 2 - margin;
     tooltipEl.style.left = left + 'px';
-    let top = rect.top - th - margin;
+    let top = rect.top - th - 6;
     if (top < margin) {
       tooltipEl.setAttribute('data-dir', 'down');
-      top = rect.bottom + margin;
+      top = rect.bottom + 6;
     }
     if (top + th > vh - margin) {
       top = vh - th - margin;
@@ -984,7 +1032,28 @@ function switchTableTab(tab, el) {
   currentTab = tab;
   document.querySelectorAll('.table-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  renderTable(generateDetails(), tab);
+  const details = generateDetails();
+  details.deduct.forEach(d => {
+    if (d.expandable) d.expanded = expandedMap.has(d.name);
+  });
+  renderTable(details, tab);
+}
+
+const expandedMap = new Set();
+
+function toggleExpand(itemName) {
+  if (expandedMap.has(itemName)) {
+    expandedMap.delete(itemName);
+  } else {
+    expandedMap.add(itemName);
+  }
+  const activeTab = document.querySelector('.table-tab.active')?.getAttribute('onclick')?.match(/'(\w+)'/)?.[1] || 'all';
+  const details = generateDetails();
+  // 应用展开状态
+  details.deduct.forEach(d => {
+    if (d.expandable) d.expanded = expandedMap.has(d.name);
+  });
+  renderTable(details, activeTab);
 }
 
 // Multi-select
@@ -1172,6 +1241,10 @@ function markdownToHtml(md) {
 function renderAll() {
   const kpi = generateKPI();
   const details = generateDetails();
+  // 应用展开状态
+  details.deduct.forEach(d => {
+    if (d.expandable) d.expanded = expandedMap.has(d.name);
+  });
   const attr = generateAttribution(details);
   renderKPIs(kpi);
   renderAlertsSection(kpi, details);
